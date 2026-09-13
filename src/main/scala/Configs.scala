@@ -1,4 +1,5 @@
 import scala.concurrent.duration.FiniteDuration
+import zio.{ZIO, ZLayer}
 
 import pureconfig.{ConfigReader, ConfigSource}
 
@@ -20,5 +21,5 @@ case class CodeforcesAuthConfig(
 ) derives ConfigReader
 
 object App {
-  def load(): App = ConfigSource.default.at("app").loadOrThrow[App]
+  val layer: ZLayer[Any, Throwable, App] = ZLayer.fromZIO(ZIO.attempt(ConfigSource.default.at("app").loadOrThrow[App]))
 }

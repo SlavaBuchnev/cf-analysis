@@ -23,16 +23,14 @@ class CfClient(
       s"$rand$hash"
     }
 
-  // authorize = false для запросов, где API запрещает авторизацию (contest.standings не-gym)
   private def request(
       method: String,
       params: Map[String, String],
-      authorize: Boolean = true,
   ): Task[String] = {
     val time = System.currentTimeMillis() / 1000
     val baseParams = params + ("time" -> time.toString)
-    val withKey = if (authorize) baseParams ++ cfgOpt.map("apiKey" -> _.apiKey) else baseParams
-    val sig = if (authorize) generateApiSig(method, baseParams) else None
+    val withKey = baseParams ++ cfgOpt.map("apiKey" -> _.apiKey)
+    val sig = generateApiSig(method, baseParams)
     val finalParams = withKey ++ sig.map("apiSig" -> _)
 
     val queryParams = QueryParams(finalParams.toSeq.map { case (k, v) => (k, Chunk(v)) }*)
@@ -53,7 +51,6 @@ class CfClient(
       }
   }
 
-  // Только getStatus — работает и для публичных, и для групповых, и для gym
   def getStatus(
       contestId: Int,
       from: Option[Int] = None,

@@ -18,8 +18,7 @@ object LanguageNormalizer {
       case s if s.startsWith("C#") || s.contains("Mono C#") => "C#"
 
       // --- C ---
-      case s if Set("GNU C", "GNU C11", "C", "C11").contains(s) => "C"
-      case s if s.startsWith("Clang") && !s.contains("++") => "C"
+      case s if Set("GNU C", "GNU C11", "C", "C11").contains(s) || (s.startsWith("Clang") && !s.contains("++")) => "C"
 
       // --- JavaScript ---
       case s if s.startsWith("Node.js") || s.startsWith("V8") || s.contains("JavaScript") => "JavaScript"

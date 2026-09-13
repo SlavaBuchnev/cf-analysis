@@ -15,7 +15,7 @@ class CodeforcesService(api: CfClient) {
     loop(1, Nil)
   }
 
-  // Инкрементальная проверка — только новые (для триггера обновления метрик)
+  // для триггера обновления метрик
   def fetchNewStatuses(contestId: Int, lastSeenId: Long, count: Int): Task[List[CfSubmission]] =
     api.getStatus(contestId, None, Some(count)).map { statuses =>
       statuses.filter(_.id > lastSeenId).sortBy(_.id)
