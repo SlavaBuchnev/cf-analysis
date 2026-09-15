@@ -1,4 +1,4 @@
-import zio.json.*
+import zio.json.JsonDecoder
 
 case class CfApiResponse(
     status: String,
@@ -14,8 +14,7 @@ case class CfProblem(
     points: Option[Double],
     rating: Option[Int],
     tags: List[String],
-) derives JsonDecoder,
-      JsonEncoder
+) derives JsonDecoder
 
 case class CfParty(
     contestId: Option[Int],
@@ -25,10 +24,9 @@ case class CfParty(
     teamName: Option[String],
     ghost: Boolean,
     startTimeSeconds: Option[Long],
-) derives JsonDecoder,
-      JsonEncoder
+) derives JsonDecoder
 
-case class CfMember(handle: String) derives JsonDecoder, JsonEncoder
+case class CfMember(handle: String) derives JsonDecoder
 
 case class CfSubmission(
     id: Long,
@@ -43,5 +41,4 @@ case class CfSubmission(
     passedTestCount: Int,
     timeConsumedMillis: Int,
     memoryConsumedBytes: Int,
-) derives JsonDecoder,
-      JsonEncoder
+) derives JsonDecoder
