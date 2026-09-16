@@ -1,9 +1,11 @@
+package cf.utils
+
 object LanguageNormalizer {
 
   def normalize(language: String): String =
     language.trim match {
       // --- C++ ---
-      case s if s.contains("C++") || s.startsWith("Clang++") => "C++"
+      case s if s.contains("C++") || s.startsWith("Clang++") || s.contains("G++") => "C++"
 
       // --- Python ---
       case s if s.startsWith("PyPy") || s.startsWith("Python") || s.startsWith("CPython") => "Python"
@@ -24,7 +26,7 @@ object LanguageNormalizer {
       case s if s.startsWith("Node.js") || s.startsWith("V8") || s.contains("JavaScript") => "JavaScript"
 
       // --- Go ---
-      case s if s == "Go" || s.startsWith("Go ") => "Go"
+      case s if s == "Go" || s.startsWith("Go") => "Go"
 
       // --- Rust ---
       case s if s.startsWith("Rust") => "Rust"

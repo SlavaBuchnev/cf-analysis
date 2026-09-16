@@ -1,6 +1,10 @@
+package cf
+
 import zio.{Task, ZIO, ZLayer}
 
-class CodeforcesService(api: CfClient) {
+import cf.models.CfSubmission
+
+class CfService(api: CfClient) {
 
   // Загружаем все посылки контеста с пагинацией
   def loadFullContestData(contestId: Int): Task[List[CfSubmission]] =
@@ -22,7 +26,7 @@ class CodeforcesService(api: CfClient) {
     }
 }
 
-object CodeforcesService {
-  val layer: ZLayer[CfClient, Nothing, CodeforcesService] =
-    ZLayer.fromFunction(new CodeforcesService(_))
+object CfService {
+  val layer: ZLayer[CfClient, Nothing, CfService] =
+    ZLayer.fromFunction(new CfService(_))
 }

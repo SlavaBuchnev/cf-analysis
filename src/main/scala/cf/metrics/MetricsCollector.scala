@@ -1,6 +1,9 @@
+package cf.metrics
+
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.ConcurrentHashMap
 
+import cf.models.CfSubmission
 import io.micrometer.core.instrument.Tags
 import io.micrometer.prometheusmetrics.{PrometheusConfig, PrometheusMeterRegistry}
 

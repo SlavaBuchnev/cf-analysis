@@ -1,3 +1,5 @@
+package cf.models
+
 import zio.json.JsonDecoder
 
 case class CfApiResponse(

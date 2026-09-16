@@ -1,12 +1,18 @@
+package cf
+
 import zio.{Chunk, Task, ZIO, ZLayer}
 import zio.http.{Client, QueryParams, Request, URL}
 import zio.json.*
 
 import java.security.MessageDigest
 
+import cf.configs.CfAuthConfig
+import cf.models.{CfApiResponse, CfSubmission}
+import cf.utils.LanguageNormalizer
+
 class CfClient(
     client: Client,
-    cfgOpt: Option[CodeforcesAuthConfig],
+    cfgOpt: Option[CfAuthConfig],
     groupCode: Option[String],
 ) {
 
@@ -74,6 +80,8 @@ class CfClient(
 }
 
 object CfClient {
-  val layer: ZLayer[Client & App, Nothing, CfClient] =
-    ZLayer.fromFunction((client: Client, config: App) => new CfClient(client, config.codeforces, config.groupCode))
+  val layer: ZLayer[Client & configs.AppConfig, Nothing, CfClient] =
+    ZLayer.fromFunction((client: Client, config: configs.AppConfig) =>
+      new CfClient(client, config.codeforces, config.groupCode),
+    )
 }

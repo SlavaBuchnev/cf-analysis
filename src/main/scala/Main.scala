@@ -1,12 +1,15 @@
 import zio.{Duration, Ref, Schedule, ZIO, ZIOAppArgs, ZIOAppDefault}
 import zio.http.Client
 
+import cf.*
+import cf.configs.AppConfig
+
 object Main extends ZIOAppDefault {
 
   override def run: ZIO[ZIOAppArgs, Any, Any] =
     (for {
-      app <- ZIO.service[App]
-      service <- ZIO.service[CodeforcesService]
+      app <- ZIO.service[AppConfig]
+      service <- ZIO.service[CfService]
       stateRefs <- Ref.make(Map.empty[Int, Long])
 
       _ <- ZIO.logInfo(
@@ -14,9 +17,9 @@ object Main extends ZIOAppDefault {
         else s"Tracking handles: ${app.handles.mkString(", ")}",
       )
       _ <- ZIO.logInfo(s"Group code: ${app.groupCode.getOrElse("(public)")}")
-      
+
       _ <- HttpServer.start(app.httpServer.port).fork
-      
+
       _ <- ContestUpdateWorker.initialLoad(service, app, stateRefs)
       _ <- ZIO.foreachDiscard(app.contestIds) { cid =>
         ContestUpdateWorker
@@ -27,9 +30,9 @@ object Main extends ZIOAppDefault {
 
       _ <- ZIO.never
     } yield ()).provide(
-      App.layer,
+      AppConfig.layer,
       Client.default,
       CfClient.layer,
-      CodeforcesService.layer,
+      CfService.layer,
     )
 }

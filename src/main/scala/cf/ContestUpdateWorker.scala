@@ -1,11 +1,16 @@
+package cf
+
 import zio.{Ref, ZIO}
+
+import cf.configs.AppConfig
+import cf.metrics.MetricsCollector
 
 object ContestUpdateWorker {
 
   /** Первичная загрузка всех контестов из конфига. */
   def initialLoad(
-      service: CodeforcesService,
-      config: App,
+      service: CfService,
+      config: AppConfig,
       stateRefs: Ref[Map[Int, Long]],
   ): ZIO[Any, Throwable, Unit] =
     for {
@@ -30,10 +35,10 @@ object ContestUpdateWorker {
 
   /** Один цикл опроса: тянем новые посылки, если есть — пересчитываем метрики. */
   def run(
-      service: CodeforcesService,
+      service: CfService,
       contestId: Int,
       stateRefs: Ref[Map[Int, Long]],
-      config: App,
+      config: AppConfig,
   ): ZIO[Any, Throwable, Unit] =
     for {
       currentMap <- stateRefs.get
