@@ -1,4 +1,6 @@
-import zio.http.{handler, Method, Request, Response, Routes}
+package cf.metrics
+
+import zio.http.*
 
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 
