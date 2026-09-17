@@ -1,21 +1,25 @@
 package cf.configs
 
-import scala.concurrent.duration.FiniteDuration
 import zio.{ZIO, ZLayer}
 
 import pureconfig.{ConfigReader, ConfigSource}
 
 case class AppConfig(
-    contestIds: List[Int],
-    handles: List[String],
-    pollInterval: FiniteDuration,
-    statusCount: Int,
     httpServer: HttpServerConfig,
-    groupCode: Option[String],
-    codeforces: Option[CfAuthConfig],
+    tracking: TrackingConfig,
+    rateLimiter: RateLimiterConfig,
+    cfApi: Option[CfAuthConfig],
 ) derives ConfigReader
 
 object AppConfig {
-  val layer: ZLayer[Any, Throwable, AppConfig] =
+  private val layer: ZLayer[Any, Throwable, AppConfig] =
     ZLayer.fromZIO(ZIO.attempt(ConfigSource.default.at("app").loadOrThrow[AppConfig]))
+
+  val rateLimiterCfgLayer: ZLayer[Any, Throwable, RateLimiterConfig] = layer.project(_.rateLimiter)
+
+  val cfApiCfgOptLayer: ZLayer[Any, Throwable, Option[CfAuthConfig]] = layer.project(_.cfApi)
+
+  val trackingCfgLayer: ZLayer[Any, Throwable, TrackingConfig] = layer.project(_.tracking)
+
+  val httpServerCfgLayer: ZLayer[Any, Throwable, HttpServerConfig] = layer.project(_.httpServer)
 }

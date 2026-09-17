@@ -16,6 +16,7 @@ lazy val root = rootProject
       "dev.zio" %% "zio-http" % "3.11.4",
       "com.github.pureconfig" %% "pureconfig-core" % "0.17.10",
       "ch.qos.logback" % "logback-classic" % "1.6.3",
+      "nl.vroste" %% "rezilience" % "0.10.5",
       "io.micrometer" % "micrometer-core" % micrometerVersion,
       "io.micrometer" % "micrometer-registry-prometheus" % micrometerVersion,
       "dev.zio" %% "zio-test" % zioVersion % Test,

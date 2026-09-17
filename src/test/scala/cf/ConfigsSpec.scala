@@ -92,8 +92,8 @@ object ConfigsSpec extends ZIOSpecDefault {
         val result = loadCf(hocon)
         assertTrue(
           result.isRight,
-          result.toOption.exists(_.apiKey == "abc"),
-          result.toOption.exists(_.apiSecret == "def"),
+          result.toOption.exists(_.key == "abc"),
+          result.toOption.exists(_.secret == "def"),
         )
       },
       test("fails when apiSecret is missing") {
