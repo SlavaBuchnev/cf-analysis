@@ -3,6 +3,7 @@ import zio.http.Client
 
 import cf.*
 import cf.configs.{AppConfig, TrackingConfig}
+import cf.utils.RateLimiter
 
 object Main extends ZIOAppDefault {
 

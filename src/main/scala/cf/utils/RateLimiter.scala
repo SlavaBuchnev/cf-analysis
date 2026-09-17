@@ -1,4 +1,4 @@
-package cf
+package cf.utils
 
 import zio.{Duration, ZIO, ZLayer}
 

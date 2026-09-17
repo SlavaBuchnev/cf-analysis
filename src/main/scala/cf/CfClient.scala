@@ -9,10 +9,12 @@ import java.security.MessageDigest
 import cf.configs.CfAuthConfig
 import cf.models.{CfApiResponse, CfSubmission}
 import cf.utils.LanguageNormalizer
+import nl.vroste.rezilience.RateLimiter as ZioRateLimiter
 
 class CfClient(
     client: Client,
     cfgOpt: Option[CfAuthConfig],
+    rateLimiter: ZioRateLimiter,
 ) {
 
   private val baseUrl = URL.decode("https://codeforces.com/api").toOption.get
@@ -31,30 +33,33 @@ class CfClient(
   private def request(
       method: String,
       params: Map[String, String],
-  ): Task[String] = {
-    val time = System.currentTimeMillis() / 1000
-    val baseParams = params + ("time" -> time.toString)
-    val withKey = baseParams ++ cfgOpt.map("apiKey" -> _.key)
-    val sig = generateApiSig(method, baseParams)
-    val finalParams = withKey ++ sig.map("apiSig" -> _)
+  ): Task[String] =
+    rateLimiter {
+      ZIO.suspendSucceed {
+        val time = System.currentTimeMillis() / 1000
+        val baseParams = params + ("time" -> time.toString)
+        val withKey = baseParams ++ cfgOpt.map("apiKey" -> _.key)
+        val sig = generateApiSig(method, baseParams)
+        val finalParams = withKey ++ sig.map("apiSig" -> _)
 
-    val queryParams = QueryParams(finalParams.toSeq.map { case (k, v) => (k, Chunk(v)) }*)
-    val uri = (baseUrl / method).setQueryParams(queryParams)
-    val req = Request.get(uri)
+        val queryParams = QueryParams(finalParams.toSeq.map { case (k, v) => (k, Chunk(v)) }*)
+        val uri = (baseUrl / method).setQueryParams(queryParams)
+        val req = Request.get(uri)
 
-    ZIO.logInfo(s"GET $uri") *>
-      client.batched(req).flatMap { resp =>
-        resp.body.asString.flatMap { body =>
-          if (body.trim.startsWith("<")) {
-            ZIO.fail(
-              new RuntimeException(
-                s"Codeforces returned HTML (Cloudflare challenge?). First 200 chars: ${body.take(200)}",
-              ),
-            )
-          } else ZIO.succeed(body)
-        }
+        ZIO.logInfo(s"GET $uri") *>
+          client.batched(req).flatMap { resp =>
+            resp.body.asString.flatMap { body =>
+              if (body.trim.startsWith("<")) {
+                ZIO.fail(
+                  new RuntimeException(
+                    s"Codeforces returned HTML (Cloudflare challenge?). First 200 chars: ${body.take(200)}",
+                  ),
+                )
+              } else ZIO.succeed(body)
+            }
+          }
       }
-  }
+    }
 
   def getStatus(
       contestId: Int,
@@ -78,6 +83,8 @@ class CfClient(
 }
 
 object CfClient {
-  val layer: ZLayer[Client & Option[CfAuthConfig], Nothing, CfClient] =
-    ZLayer.fromFunction((client: Client, config: Option[CfAuthConfig]) => new CfClient(client, config))
+  val layer: ZLayer[Client & Option[CfAuthConfig] & ZioRateLimiter, Nothing, CfClient] =
+    ZLayer.fromFunction((client: Client, config: Option[CfAuthConfig], rateLimiter: ZioRateLimiter) =>
+      new CfClient(client, config, rateLimiter),
+    )
 }
