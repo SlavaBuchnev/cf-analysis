@@ -1,6 +1,6 @@
 package cf
 
-import zio.{ZIO, ZLayer}
+import zio.{durationInt, ZIO, ZLayer}
 import zio.http.Server
 
 import cf.configs.HttpServerConfig
@@ -13,7 +13,21 @@ object HttpServer {
         cfg <- ZIO.service[HttpServerConfig]
         _ <- Server
           .serve(MetricsRoutes.routes(MetricsCollector.registry))
-          .provide(Server.defaultWithPort(cfg.port))
+          .provide(
+            Server.defaultWith(
+              _.binding(cfg.host, cfg.port)
+                // --- Производительность и лимиты ---
+                .maxHeaderSize(16 * 1024) // 16 KB
+                .maxInitialLineLength(8 * 1024) // 8 KB
+                .enableRequestStreaming
+                .requestDecompression(true)
+                .responseCompression()
+                // --- Управление соединениями ---
+                .keepAlive(true)
+                .idleTimeout(60.seconds)
+                .gracefulShutdownTimeout(20.seconds),
+            ),
+          )
           .forkScoped
       } yield ()
     }
