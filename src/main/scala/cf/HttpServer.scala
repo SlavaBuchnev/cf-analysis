@@ -1,6 +1,6 @@
 package cf
 
-import zio.{durationInt, ZIO, ZLayer}
+import zio.{Duration, ZIO, ZLayer}
 import zio.http.Server
 
 import cf.configs.HttpServerConfig
@@ -17,15 +17,15 @@ object HttpServer {
             Server.defaultWith(
               _.binding(cfg.host, cfg.port)
                 // --- Производительность и лимиты ---
-                .maxHeaderSize(16 * 1024) // 16 KB
-                .maxInitialLineLength(8 * 1024) // 8 KB
+                .maxHeaderSize(cfg.maxHeaderSize.toBytes.toInt)
+                .maxInitialLineLength(cfg.maxInitialLineLength.toBytes.toInt)
                 .enableRequestStreaming
                 .requestDecompression(true)
                 .responseCompression()
                 // --- Управление соединениями ---
-                .keepAlive(true)
-                .idleTimeout(60.seconds)
-                .gracefulShutdownTimeout(20.seconds),
+                .keepAlive(cfg.keepAlive)
+                .idleTimeout(Duration.fromScala(cfg.idleTimeout))
+                .gracefulShutdownTimeout(Duration.fromScala(cfg.gracefulShutdownTimeout)),
             ),
           )
           .forkScoped
