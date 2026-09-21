@@ -6,9 +6,9 @@ on:
       - '**'  # Все ветки
 
 jobs:
-  compile:
+  testing:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
 

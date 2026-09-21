@@ -9,11 +9,12 @@ import java.security.MessageDigest
 import cf.configs.CfAuthConfig
 import cf.models.{CfApiResponse, CfSubmission}
 import cf.utils.LanguageNormalizer
+import nl.vroste.rezilience.RateLimiter as ZioRateLimiter
 
 class CfClient(
     client: Client,
     cfgOpt: Option[CfAuthConfig],
-    groupCode: Option[String],
+    rateLimiter: ZioRateLimiter,
 ) {
 
   private val baseUrl = URL.decode("https://codeforces.com/api").toOption.get
@@ -22,8 +23,8 @@ class CfClient(
     cfgOpt.map { cfg =>
       val rand = scala.util.Random.alphanumeric.take(6).mkString
       val sortedParams =
-        (params + ("apiKey" -> cfg.apiKey)).toSeq.sortBy(_._1).map { case (k, v) => s"$k=$v" }.mkString("&")
-      val stringToSign = s"$rand/$methodName?$sortedParams#${cfg.apiSecret}"
+        (params + ("apiKey" -> cfg.key)).toSeq.sortBy(_._1).map { case (k, v) => s"$k=$v" }.mkString("&")
+      val stringToSign = s"$rand/$methodName?$sortedParams#${cfg.secret}"
       val md = MessageDigest.getInstance("SHA-512")
       val hash = md.digest(stringToSign.getBytes("UTF-8")).map(b => f"${b & 0xff}%02x").mkString
       s"$rand$hash"
@@ -32,30 +33,33 @@ class CfClient(
   private def request(
       method: String,
       params: Map[String, String],
-  ): Task[String] = {
-    val time = System.currentTimeMillis() / 1000
-    val baseParams = params + ("time" -> time.toString)
-    val withKey = baseParams ++ cfgOpt.map("apiKey" -> _.apiKey)
-    val sig = generateApiSig(method, baseParams)
-    val finalParams = withKey ++ sig.map("apiSig" -> _)
+  ): Task[String] =
+    rateLimiter {
+      ZIO.suspendSucceed {
+        val time = System.currentTimeMillis() / 1000
+        val baseParams = params + ("time" -> time.toString)
+        val withKey = baseParams ++ cfgOpt.map("apiKey" -> _.key)
+        val sig = generateApiSig(method, baseParams)
+        val finalParams = withKey ++ sig.map("apiSig" -> _)
 
-    val queryParams = QueryParams(finalParams.toSeq.map { case (k, v) => (k, Chunk(v)) }*)
-    val uri = (baseUrl / method).setQueryParams(queryParams)
-    val req = Request.get(uri)
+        val queryParams = QueryParams(finalParams.toSeq.map { case (k, v) => (k, Chunk(v)) }*)
+        val uri = (baseUrl / method).setQueryParams(queryParams)
+        val req = Request.get(uri)
 
-    ZIO.logInfo(s"GET $uri") *>
-      client.batched(req).flatMap { resp =>
-        resp.body.asString.flatMap { body =>
-          if (body.trim.startsWith("<")) {
-            ZIO.fail(
-              new RuntimeException(
-                s"Codeforces returned HTML (Cloudflare challenge?). First 200 chars: ${body.take(200)}",
-              ),
-            )
-          } else ZIO.succeed(body)
-        }
+        ZIO.logInfo(s"GET $uri") *>
+          client.batched(req).flatMap { resp =>
+            resp.body.asString.flatMap { body =>
+              if (body.trim.startsWith("<")) {
+                ZIO.fail(
+                  new RuntimeException(
+                    s"Codeforces returned HTML (Cloudflare challenge?). First 200 chars: ${body.take(200)}",
+                  ),
+                )
+              } else ZIO.succeed(body)
+            }
+          }
       }
-  }
+    }
 
   def getStatus(
       contestId: Int,
@@ -64,8 +68,7 @@ class CfClient(
   ): Task[List[CfSubmission]] = {
     val params = Map("contestId" -> contestId.toString, "asManager" -> "true") ++
       from.map("from" -> _.toString) ++
-      count.map("count" -> _.toString) ++
-      groupCode.map("groupCode" -> _)
+      count.map("count" -> _.toString)
     request("contest.status", params).flatMap { json =>
       json.fromJson[CfApiResponse] match {
         case Right(resp) if resp.status == "OK" => ZIO.succeed(resp.result.map(normalizeSubmission))
@@ -80,8 +83,8 @@ class CfClient(
 }
 
 object CfClient {
-  val layer: ZLayer[Client & configs.AppConfig, Nothing, CfClient] =
-    ZLayer.fromFunction((client: Client, config: configs.AppConfig) =>
-      new CfClient(client, config.codeforces, config.groupCode),
+  val layer: ZLayer[Client & Option[CfAuthConfig] & ZioRateLimiter, Nothing, CfClient] =
+    ZLayer.fromFunction((client: Client, config: Option[CfAuthConfig], rateLimiter: ZioRateLimiter) =>
+      new CfClient(client, config, rateLimiter),
     )
 }

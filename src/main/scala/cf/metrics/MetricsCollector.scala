@@ -39,9 +39,7 @@ object MetricsCollector {
       contestId: Int,
       statuses: List[CfSubmission],
       targetHandles: List[String],
-      groupCode: Option[String],
   ): Unit = {
-    val group = groupCode.getOrElse("")
     val cid = contestId.toString
 
     val normalizedTargets = targetHandles.map(_.toLowerCase).toSet
@@ -54,7 +52,7 @@ object MetricsCollector {
         }
 
     filtered.groupBy(normalizedHandle).foreach { case (handle, subs) =>
-      val base = Tags.of("handle", handle, "contestId", cid, "group", group)
+      val base = Tags.of("handle", handle, "contestId", cid)
 
       // ---------------------------------------------------------
       // 1. Посылки по (language, verdict)

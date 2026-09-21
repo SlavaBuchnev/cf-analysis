@@ -1,38 +1,38 @@
-import zio.{Duration, Ref, Schedule, ZIO, ZIOAppArgs, ZIOAppDefault}
+import zio.{Duration, Schedule, ZIO, ZIOAppArgs, ZIOAppDefault}
 import zio.http.Client
 
 import cf.*
-import cf.configs.AppConfig
+import cf.configs.{AppConfig, TrackingConfig}
+import cf.utils.RateLimiter
 
 object Main extends ZIOAppDefault {
 
   override def run: ZIO[ZIOAppArgs, Any, Any] =
     (for {
-      app <- ZIO.service[AppConfig]
-      service <- ZIO.service[CfService]
-      stateRefs <- Ref.make(Map.empty[Int, Long])
+      config <- ZIO.service[TrackingConfig]
+      worker <- ZIO.service[ContestUpdateWorker]
 
-      _ <- ZIO.logInfo(
-        if (app.handles.isEmpty) "Public contest mode: tracking all participants"
-        else s"Tracking handles: ${app.handles.mkString(", ")}",
-      )
-      _ <- ZIO.logInfo(s"Group code: ${app.groupCode.getOrElse("(public)")}")
-
-      _ <- HttpServer.start(app.httpServer.port).fork
-
-      _ <- ContestUpdateWorker.initialLoad(service, app, stateRefs)
-      _ <- ZIO.foreachDiscard(app.contestIds) { cid =>
-        ContestUpdateWorker
-          .run(service, cid, stateRefs, app)
-          .repeat(Schedule.fixed(Duration.fromScala(app.pollInterval)))
+      _ <- worker.initialLoad
+      _ <- ZIO.foreachDiscard(config.contestIds) { cid =>
+        worker
+          .run(cid)
+          .repeat(Schedule.fixed(Duration.fromScala(config.pollInterval)))
           .fork
       }
 
       _ <- ZIO.never
     } yield ()).provide(
-      AppConfig.layer,
+      // configs
+      AppConfig.rateLimiterCfgLayer,
+      AppConfig.cfApiCfgOptLayer,
+      AppConfig.trackingCfgLayer,
+      AppConfig.httpServerCfgLayer,
+      // server
       Client.default,
       CfClient.layer,
       CfService.layer,
+      HttpServer.layer,
+      ContestUpdateWorker.layer,
+      RateLimiter.layer,
     )
 }
