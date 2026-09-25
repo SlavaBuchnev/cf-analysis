@@ -4,15 +4,16 @@ import zio.{Duration, ZIO, ZLayer}
 import zio.http.Server
 
 import cf.configs.HttpServerConfig
-import cf.metrics.{MetricsCollector, MetricsRoutes}
+import cf.routes.HttpRoutes
 
 object HttpServer {
-  val layer: ZLayer[HttpServerConfig, Throwable, Unit] =
+  val layer: ZLayer[HttpServerConfig & HttpRoutes, Throwable, Unit] =
     ZLayer.scoped {
       for {
         cfg <- ZIO.service[HttpServerConfig]
+        routes <- ZIO.service[HttpRoutes]
         _ <- Server
-          .serve(MetricsRoutes.routes(MetricsCollector.registry))
+          .serve(routes.routes)
           .provide(
             Server.defaultWith(
               _.binding(cfg.host, cfg.port)

@@ -26,7 +26,7 @@ object LanguageNormalizer {
       case s if s.startsWith("Node.js") || s.startsWith("V8") || s.contains("JavaScript") => "JavaScript"
 
       // --- Go ---
-      case s if s == "Go" || s.startsWith("Go") => "Go"
+      case s if s.contains("Go") => "Go"
 
       // --- Rust ---
       case s if s.startsWith("Rust") => "Rust"
@@ -53,7 +53,7 @@ object LanguageNormalizer {
       case s if s.contains("Pascal") || s == "Delphi" => "Pascal"
 
       // --- D ---
-      case s if s == "D" || s.startsWith("D ") => "D"
+      case s if s.contains("D") => "D"
 
       // --- Прочее ---
       case _ => "Other"
