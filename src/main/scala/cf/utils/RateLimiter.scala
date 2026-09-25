@@ -14,4 +14,8 @@ object RateLimiter {
           <& ZIO.logInfo(s"Create Rate Limiter: max=${cfg.max} per ${cfg.interval}")
       } yield rl
     }
+
+  val noop = new ZioRateLimiter {
+    override def apply[R, E, A](task: ZIO[R, E, A]): ZIO[R, E, A] = task
+  }
 }

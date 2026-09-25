@@ -1,5 +1,7 @@
 package cf.metrics
 
+import zio.{ZIO, ZLayer}
+
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.ConcurrentHashMap
 
@@ -10,6 +12,11 @@ import io.micrometer.prometheusmetrics.{PrometheusConfig, PrometheusMeterRegistr
 object MetricsCollector {
 
   val registry: PrometheusMeterRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+
+  val layer: ZLayer[Any, Nothing, PrometheusMeterRegistry] =
+    ZLayer.scoped {
+      ZIO.acquireRelease(ZIO.succeed(registry))(r => ZIO.succeed(r.close()))
+    }
 
   private val gaugeValues = new ConcurrentHashMap[String, AtomicReference[Double]]()
 
@@ -34,6 +41,10 @@ object MetricsCollector {
 
   private def normalizedHandle(s: CfSubmission): String =
     s.author.members.headOption.map(_.handle.toLowerCase).getOrElse("unknown")
+
+    /** Перегрузка для ContestCache: считаем по всем участникам контеста. */
+  def updateContestMetrics(contestId: Int, statuses: List[CfSubmission]): Unit =
+    updateContestMetrics(contestId, statuses, Nil)
 
   def updateContestMetrics(
       contestId: Int,

@@ -1,38 +1,36 @@
-import zio.{Duration, Schedule, ZIO, ZIOAppArgs, ZIOAppDefault}
+import zio.{ZIO, ZIOAppArgs, ZIOAppDefault}
 import zio.http.Client
 
-import cf.*
-import cf.configs.{AppConfig, TrackingConfig}
+import cf.{AppLifecycle, HttpServer}
+import cf.codeforces.{CodeforcesCache, CodeforcesClient, CodeforcesService}
+import cf.configs.AppConfig
+import cf.metrics.MetricsCollector
+import cf.routes.HttpRoutes
 import cf.utils.RateLimiter
 
 object Main extends ZIOAppDefault {
 
   override def run: ZIO[ZIOAppArgs, Any, Any] =
-    (for {
-      config <- ZIO.service[TrackingConfig]
-      worker <- ZIO.service[ContestUpdateWorker]
-
-      _ <- worker.initialLoad
-      _ <- ZIO.foreachDiscard(config.contestIds) { cid =>
-        worker
-          .run(cid)
-          .repeat(Schedule.fixed(Duration.fromScala(config.pollInterval)))
-          .fork
-      }
-
-      _ <- ZIO.never
-    } yield ()).provide(
-      // configs
-      AppConfig.rateLimiterCfgLayer,
-      AppConfig.cfApiCfgOptLayer,
-      AppConfig.trackingCfgLayer,
-      AppConfig.httpServerCfgLayer,
-      // server
-      Client.default,
-      CfClient.layer,
-      CfService.layer,
-      HttpServer.layer,
-      ContestUpdateWorker.layer,
-      RateLimiter.layer,
-    )
+    ZIO
+      .scoped(ZIO.serviceWithZIO[AppLifecycle](_.start))
+      .provide(
+        // configs
+        AppConfig.rateLimiterCfgLayer,
+        AppConfig.cfApiCfgOptLayer,
+        AppConfig.httpServerCfgLayer,
+        AppConfig.cacheCfgLayer,
+        // metrics
+        MetricsCollector.layer,
+        // routes
+        HttpRoutes.layer,
+        // lifecycle
+        AppLifecycle.layer,
+        // infrastructure
+        Client.default,
+        CodeforcesCache.layer,
+        CodeforcesClient.layer,
+        CodeforcesService.layer,
+        HttpServer.layer,
+        RateLimiter.layer,
+      )
 }

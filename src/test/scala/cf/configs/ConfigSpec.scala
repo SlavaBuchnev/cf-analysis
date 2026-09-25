@@ -8,15 +8,15 @@ import pureconfig.error.ConfigReaderFailures
 
 trait ConfigSpec[A: ConfigReader] extends ZIOSpecDefault {
 
-  protected def configPath: String
-  protected def validHocon: String
-  protected def assertValid(config: A): TestResult
-  protected def invalidCases: Map[String, String]
+  def configPath: String
+  def validHocon: String
+  def assertValid(config: A): TestResult
+  def invalidCases: Map[String, String]
 
-  protected final def load(hocon: String): Either[ConfigReaderFailures, A] =
+  final def load(hocon: String): Either[ConfigReaderFailures, A] =
     ConfigSource.string(hocon).at(configPath).load[A]
 
-  protected final def configTests: Spec[Any, Nothing] = {
+  final def configTests: Spec[Any, Nothing] = {
     val validTest: Spec[Any, Nothing] =
       test("loads valid config") {
         load(validHocon) match {

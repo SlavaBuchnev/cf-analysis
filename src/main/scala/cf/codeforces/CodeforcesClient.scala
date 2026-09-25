@@ -1,4 +1,4 @@
-package cf
+package cf.codeforces
 
 import zio.{Chunk, Task, ZIO, ZLayer}
 import zio.http.{Client, QueryParams, Request, URL}
@@ -11,7 +11,7 @@ import cf.models.{CfApiResponse, CfSubmission}
 import cf.utils.LanguageNormalizer
 import nl.vroste.rezilience.RateLimiter as ZioRateLimiter
 
-class CfClient(
+class CodeforcesClient(
     client: Client,
     cfgOpt: Option[CfAuthConfig],
     rateLimiter: ZioRateLimiter,
@@ -35,7 +35,7 @@ class CfClient(
       params: Map[String, String],
   ): Task[String] =
     rateLimiter {
-      ZIO.suspendSucceed {
+      ZIO.suspend {
         val time = System.currentTimeMillis() / 1000
         val baseParams = params + ("time" -> time.toString)
         val withKey = baseParams ++ cfgOpt.map("apiKey" -> _.key)
@@ -66,9 +66,10 @@ class CfClient(
       from: Option[Int] = None,
       count: Option[Int] = None,
   ): Task[List[CfSubmission]] = {
-    val params = Map("contestId" -> contestId.toString, "asManager" -> "true") ++
+    val params = Map("contestId" -> contestId.toString) ++
       from.map("from" -> _.toString) ++
-      count.map("count" -> _.toString)
+      count.map("count" -> _.toString) ++
+      cfgOpt.map(_ => "asManager" -> "true")
     request("contest.status", params).flatMap { json =>
       json.fromJson[CfApiResponse] match {
         case Right(resp) if resp.status == "OK" => ZIO.succeed(resp.result.map(normalizeSubmission))
@@ -82,9 +83,9 @@ class CfClient(
     s.copy(programmingLanguage = LanguageNormalizer.normalize(s.programmingLanguage))
 }
 
-object CfClient {
-  val layer: ZLayer[Client & Option[CfAuthConfig] & ZioRateLimiter, Nothing, CfClient] =
+object CodeforcesClient {
+  val layer: ZLayer[Client & Option[CfAuthConfig] & ZioRateLimiter, Nothing, CodeforcesClient] =
     ZLayer.fromFunction((client: Client, config: Option[CfAuthConfig], rateLimiter: ZioRateLimiter) =>
-      new CfClient(client, config, rateLimiter),
+      new CodeforcesClient(client, config, rateLimiter),
     )
 }

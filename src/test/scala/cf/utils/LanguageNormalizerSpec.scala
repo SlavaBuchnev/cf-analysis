@@ -2,7 +2,7 @@ package cf.utils
 
 import zio.test.{assertTrue, ZIOSpecDefault}
 
-object LanguageNormalizerSpec extends ZIOSpecDefault {
+object LanguageNormalizerSpec extends ZIOSpecDefault { 
   private val cases: List[(String, String)] = List(
     "GNU G++17" -> "C++",
     "Clang++17" -> "C++",

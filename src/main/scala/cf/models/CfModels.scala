@@ -1,6 +1,6 @@
 package cf.models
 
-import zio.json.JsonDecoder
+import zio.json.{JsonDecoder, JsonEncoder}
 
 case class CfApiResponse(
     status: String,
@@ -16,7 +16,8 @@ case class CfProblem(
     points: Option[Double],
     rating: Option[Int],
     tags: List[String],
-) derives JsonDecoder
+) derives JsonDecoder,
+      JsonEncoder
 
 case class CfParty(
     contestId: Option[Int],
@@ -26,9 +27,10 @@ case class CfParty(
     teamName: Option[String],
     ghost: Boolean,
     startTimeSeconds: Option[Long],
-) derives JsonDecoder
+) derives JsonDecoder,
+      JsonEncoder
 
-case class CfMember(handle: String) derives JsonDecoder
+case class CfMember(handle: String) derives JsonDecoder, JsonEncoder
 
 case class CfSubmission(
     id: Long,
@@ -43,4 +45,5 @@ case class CfSubmission(
     passedTestCount: Int,
     timeConsumedMillis: Int,
     memoryConsumedBytes: Int,
-) derives JsonDecoder
+) derives JsonDecoder,
+      JsonEncoder
