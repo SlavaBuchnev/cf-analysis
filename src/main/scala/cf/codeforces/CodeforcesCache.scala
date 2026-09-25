@@ -8,12 +8,18 @@ import cf.configs.CacheConfig
 import cf.metrics.MetricsCollector
 import cf.models.{ContestEntry, ContestState}
 
-class CodeforcesCache(
+trait CodeforcesCache {
+  def get(contestId: Int): Task[ContestState]
+  def warmup: UIO[Unit]
+  def evictIdle: UIO[Int]
+}
+
+class CodeforcesCacheImpl(
     service: CodeforcesService,
     cache: Cache[Int, Throwable, ContestEntry],
     lastAccess: Ref[Map[Int, Long]],
     config: CacheConfig,
-) {
+) extends CodeforcesCache {
 
   private def toZioDurationMillis(duration: FiniteDuration): Long = Duration.fromScala(duration).toMillis
 
@@ -25,7 +31,7 @@ class CodeforcesCache(
 
   private def nowMillis: UIO[Long] = Clock.instant.map(_.toEpochMilli)
 
-  def get(contestId: Int): Task[ContestState] = for {
+  override def get(contestId: Int): Task[ContestState] = for {
     now <- nowMillis
     entry <- cache.get(contestId)
     state <- entry.state.get
@@ -33,7 +39,7 @@ class CodeforcesCache(
     _ <- maybeRefresh(contestId, entry, now)
   } yield state
 
-  def warmup: UIO[Unit] =
+  override def warmup: UIO[Unit] =
     ZIO.ifZIO(ZIO.succeed(warmupSet.isEmpty))(
       onTrue = ZIO.logInfo("Cache warmup disabled"),
       onFalse = ZIO.logInfo(s"Warming up cache with contests: ${warmupSet.mkString(", ")}") *>
@@ -45,7 +51,7 @@ class CodeforcesCache(
         },
     )
 
-  def evictIdle: UIO[Int] = for {
+  override def evictIdle: UIO[Int] = for {
     now <- nowMillis
     access <- lastAccess.get
     idle = access.collect {
@@ -97,7 +103,7 @@ object CodeforcesCache {
           timeToLive = Duration.fromScala(cfg.ttl),
           lookup = Lookup(cid => loadEntry(service, cid)),
         )
-      } yield new CodeforcesCache(service, cache, lastAccess, cfg)
+      } yield new CodeforcesCacheImpl(service, cache, lastAccess, cfg)
     }
 
   private def loadEntry(service: CodeforcesService, cid: Int): ZIO[Any, Throwable, ContestEntry] =
