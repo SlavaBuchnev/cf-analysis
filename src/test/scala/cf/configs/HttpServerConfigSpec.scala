@@ -7,9 +7,9 @@ import com.typesafe.config.ConfigMemorySize
 
 object HttpServerConfigSpec extends ConfigSpec[HttpServerConfig] {
 
-  override protected val configPath: String = "http-server"
+  override val configPath: String = "http-server"
 
-  override protected val validHocon: String =
+  override val validHocon: String =
     """http-server {
       |  host = "0.0.0.0"
       |  port = 8080
@@ -20,7 +20,7 @@ object HttpServerConfigSpec extends ConfigSpec[HttpServerConfig] {
       |  graceful-shutdown-timeout = 20s
       |}""".stripMargin
 
-  override protected def assertValid(config: HttpServerConfig): TestResult =
+  override def assertValid(config: HttpServerConfig): TestResult =
     assertTrue(
       config.host == "0.0.0.0",
       config.port == 8080,
@@ -31,7 +31,7 @@ object HttpServerConfigSpec extends ConfigSpec[HttpServerConfig] {
       config.gracefulShutdownTimeout == 20.seconds,
     )
 
-  override protected val invalidCases: Map[String, String] = Map(
+  override val invalidCases: Map[String, String] = Map(
     "host is missing" ->
       """
         |http-server {

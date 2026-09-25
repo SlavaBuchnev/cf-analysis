@@ -26,10 +26,12 @@ lazy val root = rootProject
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio" % zioVersion,
       "dev.zio" %% "zio-http" % "3.11.4",
+      "dev.zio" %% "zio-cache" % "0.3.0",
       "com.github.pureconfig" %% "pureconfig-core" % "0.17.10",
       "ch.qos.logback" % "logback-classic" % "1.6.3",
       "nl.vroste" %% "rezilience" % "0.10.5",
       "io.micrometer" % "micrometer-core" % micrometerVersion,
       "io.micrometer" % "micrometer-registry-prometheus" % micrometerVersion,
+      "org.scalamock" %% "scalamock-zio" % "7.6.0" % Test,
     ),
   )

@@ -6,9 +6,9 @@ import pureconfig.{ConfigReader, ConfigSource}
 
 case class AppConfig(
     httpServer: HttpServerConfig,
-    tracking: TrackingConfig,
     rateLimiter: RateLimiterConfig,
     cfApi: Option[CfAuthConfig],
+    cache: CacheConfig,
 ) derives ConfigReader
 
 object AppConfig {
@@ -19,7 +19,7 @@ object AppConfig {
 
   val cfApiCfgOptLayer: ZLayer[Any, Throwable, Option[CfAuthConfig]] = layer.project(_.cfApi)
 
-  val trackingCfgLayer: ZLayer[Any, Throwable, TrackingConfig] = layer.project(_.tracking)
-
   val httpServerCfgLayer: ZLayer[Any, Throwable, HttpServerConfig] = layer.project(_.httpServer)
+
+  val cacheCfgLayer: ZLayer[Any, Throwable, CacheConfig] = layer.project(_.cache)
 }
