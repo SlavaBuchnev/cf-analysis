@@ -2,7 +2,7 @@ name: Publish Docker Image
 
 on:
   workflow_run:
-    workflows: ["ci"]
+    workflows: ["CI"]
     types:
       - completed
 
@@ -12,19 +12,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
       - name: Setup Scala
         uses: ./.github/setup-scala
 
       - name: Compute Docker tag
         id: tag
         run: |
-          if [ "${{ github.ref_name }}" = "master" ]; then
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          if [ "$BRANCH" = "master" ]; then
             TAG="master-latest"
           else
             TAG="dev-latest"
           fi
           echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "Computed tag: $TAG"
+          echo "Computed tag: $TAG (branch: $BRANCH)"
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -36,3 +42,4 @@ jobs:
         run: sbt Docker/publish
         env:
           DOCKER_TAG: ${{ steps.tag.outputs.tag }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
