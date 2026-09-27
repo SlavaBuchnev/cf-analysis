@@ -49,7 +49,7 @@ lazy val root = rootProject
     Compile / mainClass := Some("cf.Main"),
     dockerBaseImage := "eclipse-temurin:17-jre-jammy",
     dockerExposedPorts := Seq(8080),
-    Docker / packageName := "cf-analysis",
+    Docker / packageName := s"${sys.env.getOrElse("DOCKER_USERNAME", "cf-analysis")}/cf-analysis",
     Docker / version := sys.env.getOrElse("DOCKER_TAG", "latest"),
     Docker / maintainer := "Slava Buchnev <slavabuchnev5@gmail.com>",
   )

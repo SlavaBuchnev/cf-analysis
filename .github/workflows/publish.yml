@@ -1,17 +1,17 @@
 name: Publish Docker Image
 
 on:
-  push:
-    branches:
-      - '**'
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
 
 jobs:
   publish:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Setup Scala
         uses: ./.github/setup-scala
 
