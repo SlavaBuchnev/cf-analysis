@@ -1,0 +1,15 @@
+name: 'Setup Scala'
+description: 'Общие настройки по установке Java и sbt'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'sbt'
+
+    - name: Setup sbt
+      uses: sbt/setup-sbt@v1

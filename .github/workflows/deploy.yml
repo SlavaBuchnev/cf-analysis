@@ -1,0 +1,68 @@
+name: Deploy (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Куда деплоить'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+      image_tag:
+        description: 'Docker-тег (например, dev-latest, master-latest, v1.0.0, mvp)'
+        required: true
+        default: 'dev-latest'
+
+jobs:
+  deploy-dev:
+    if: inputs.environment == 'dev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Plug deploy dev
+        run: |
+          echo "Deploy on dev"
+#      - name: Update Render service image
+#        run: |
+#          echo "Setting Render image to cf-analysis:${{ inputs.image_tag }}..."
+#          curl -X PATCH "https://api.render.com/v1/services/${{ secrets.RENDER_DEV_SERVICE_ID }}" \
+#            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+#            -H "Content-Type: application/json" \
+#            -d '{
+#              "image": {
+#                "imagePath": "${{ secrets.DOCKER_USERNAME }}/cf-analysis:${{ inputs.image_tag }}"
+#              }
+#            }'
+#
+#      - name: Trigger Render deploy
+#        run: |
+#          curl -X POST "${{ secrets.RENDER_DEV_DEPLOY_HOOK_URL }}"
+
+  deploy-prod:
+    if: inputs.environment == 'prod'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Plug deploy prod
+        run: |
+          echo "Deploy on prod"
+#      - name: Update Koyeb service image
+#        run: |
+#          echo "Setting Koyeb image to cf-analysis:${{ inputs.image_tag }}..."
+#          curl -X PATCH "https://app.koyeb.com/v1/services/${{ secrets.KOYEB_SERVICE_ID }}" \
+#            -H "Authorization: Bearer ${{ secrets.KOYEB_API_TOKEN }}" \
+#            -H "Content-Type: application/json" \
+#            -d '{
+#              "definition": {
+#                "docker": {
+#                  "image": "${{ secrets.DOCKER_USERNAME }}/cf-analysis:${{ inputs.image_tag }}"
+#                }
+#              }
+#            }'
+#
+#      - name: Redeploy Koyeb service
+#        run: |
+#          curl -X POST "https://app.koyeb.com/v1/services/${{ secrets.KOYEB_SERVICE_ID }}/redeploy" \
+#            -H "Authorization: Bearer ${{ secrets.KOYEB_API_TOKEN }}" \
+#            -H "Content-Type: application/json"
