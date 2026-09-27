@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'  # Все ветки
+
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Scala
+        uses: ./.github/setup-scala
+
+      - name: Unit test
+        run: sbt test

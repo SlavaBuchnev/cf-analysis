@@ -13,8 +13,20 @@ inThisBuild(
   ),
 )
 
+Global / excludeLintKeys ++= Set(
+  Debian / executableScriptName,
+  Debian / sourceDirectory,
+  Rpm / daemonStdoutLogFile,
+  Rpm / executableScriptName,
+  Rpm / name,
+  Rpm / sourceDirectory,
+  Universal / executableScriptName,
+  UniversalDocs / name,
+  UniversalSrc / name,
+)
+
 lazy val root = rootProject
-  .enablePlugins(ZioSbtEcosystemPlugin, ZioSbtCiPlugin)
+  .enablePlugins(ZioSbtEcosystemPlugin, ZioSbtCiPlugin, JavaAppPackaging, DockerPlugin)
   .settings(stdSettings(Some("cf-analysis"), Some("cf")))
   .settings(enableZIO())
   .settings(
@@ -34,4 +46,10 @@ lazy val root = rootProject
       "io.micrometer" % "micrometer-registry-prometheus" % micrometerVersion,
       "org.scalamock" %% "scalamock-zio" % "7.6.0" % Test,
     ),
+    Compile / mainClass := Some("cf.Main"),
+    dockerBaseImage := "eclipse-temurin:17-jre-jammy",
+    dockerExposedPorts := Seq(8080),
+    Docker / packageName := s"${sys.env.getOrElse("DOCKER_USERNAME", "cf-analysis")}/cf-analysis",
+    Docker / version := sys.env.getOrElse("DOCKER_TAG", "latest"),
+    Docker / maintainer := "Slava Buchnev <slavabuchnev5@gmail.com>",
   )
