@@ -46,7 +46,7 @@ lazy val root = rootProject
       "io.micrometer" % "micrometer-registry-prometheus" % micrometerVersion,
       "org.scalamock" %% "scalamock-zio" % "7.6.0" % Test,
     ),
-    Compile / mainClass := Some("cf.Main"),
+    Compile / mainClass := Some("Main"),
     dockerBaseImage := "eclipse-temurin:17-jre-jammy",
     dockerExposedPorts := Seq(8080),
     Docker / packageName := s"${sys.env.getOrElse("DOCKER_USERNAME", "cf-analysis")}/cf-analysis",
