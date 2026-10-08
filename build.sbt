@@ -48,8 +48,18 @@ lazy val root = rootProject
     ),
     Compile / mainClass := Some("Main"),
     dockerBaseImage := "eclipse-temurin:17-jre-jammy",
+    dockerEntrypoint := Seq(
+      "bin/cf-analysis",
+      "-J-XX:MaxRAMPercentage=75.0", // Использует 75% от лимита памяти контейнера
+      "-J-XX:+UseZGC", // Низколатентный сборщик мусора
+      "-J-XX:+UseContainerSupport", // Автоматическое определение лимитов
+    ),
     dockerExposedPorts := Seq(8080),
     Docker / packageName := s"${sys.env.getOrElse("DOCKER_USERNAME", "cf-analysis")}/cf-analysis",
     Docker / version := sys.env.getOrElse("DOCKER_TAG", "latest"),
     Docker / maintainer := "Slava Buchnev <slavabuchnev5@gmail.com>",
+    dockerLabels := Map(
+      "maintainer" -> maintainer.value,
+      "version" -> version.value,
+    ),
   )
