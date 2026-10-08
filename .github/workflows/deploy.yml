@@ -3,14 +3,6 @@ name: Deploy (Manual)
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Куда деплоить'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - prod
       image_tag:
         description: 'Docker-тег (например, dev-latest, master-latest, v1.0.0, mvp)'
         required: true
@@ -20,8 +12,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Render (dev)
-        if: inputs.environment == 'dev'
+      - name: Deploy to Render
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_DEV_SERVICE_ID }}
@@ -35,16 +26,3 @@ jobs:
             -d "{\"image\": {\"imagePath\": \"$DOCKER_IMAGE\"}}"
 
           curl -X POST "${{ secrets.RENDER_DEV_DEPLOY_HOOK_URL }}"
-
-      - name: Deploy to Koyeb (prod)
-        if: inputs.environment == 'prod'
-        run: |
-          echo "Setting Koyeb image to cf-analysis:${{ inputs.image_tag }}..."
-          # curl -X PATCH "https://app.koyeb.com/v1/services/${{ secrets.KOYEB_SERVICE_ID }}" \
-          #   -H "Authorization: Bearer ${{ secrets.KOYEB_API_TOKEN }}" \
-          #   -H "Content-Type: application/json" \
-          #   -d '{"definition": {"docker": {"image": "${{ secrets.DOCKER_USERNAME }}/cf-analysis:${{ inputs.image_tag }}"}}}'
-          #
-          # curl -X POST "https://app.koyeb.com/v1/services/${{ secrets.KOYEB_SERVICE_ID }}/redeploy" \
-          #   -H "Authorization: Bearer ${{ secrets.KOYEB_API_TOKEN }}" \
-          #   -H "Content-Type: application/json"
