@@ -36,28 +36,29 @@ class CodeforcesClient(
   ): Task[String] =
     rateLimiter {
       ZIO.suspend {
-        val time = System.currentTimeMillis() / 1000
-        val baseParams = params + ("time" -> time.toString)
-        val withKey = baseParams ++ cfgOpt.map("apiKey" -> _.key)
-        val sig = generateApiSig(method, baseParams)
-        val finalParams = withKey ++ sig.map("apiSig" -> _)
+        ZIO.clockWith(_.currentTime(java.util.concurrent.TimeUnit.SECONDS)).flatMap { time =>
+          val baseParams = params + ("time" -> time.toString)
+          val withKey = baseParams ++ cfgOpt.map("apiKey" -> _.key)
+          val sig = generateApiSig(method, baseParams)
+          val finalParams = withKey ++ sig.map("apiSig" -> _)
 
-        val queryParams = QueryParams(finalParams.toSeq.map { case (k, v) => (k, Chunk(v)) }*)
-        val uri = (baseUrl / method).setQueryParams(queryParams)
-        val req = Request.get(uri)
+          val queryParams = QueryParams(finalParams.toSeq.map { case (k, v) => (k, Chunk(v)) }*)
+          val uri = (baseUrl / method).setQueryParams(queryParams)
+          val req = Request.get(uri)
 
-        ZIO.logInfo(s"GET $uri") *>
-          client.batched(req).flatMap { resp =>
-            resp.body.asString.flatMap { body =>
-              if (body.trim.startsWith("<")) {
-                ZIO.fail(
-                  new RuntimeException(
-                    s"Codeforces returned HTML (Cloudflare challenge?). First 200 chars: ${body.take(200)}",
-                  ),
-                )
-              } else ZIO.succeed(body)
+          ZIO.logInfo(s"GET $uri") *>
+            client.batched(req).flatMap { resp =>
+              resp.body.asString.flatMap { body =>
+                if (body.trim.startsWith("<")) {
+                  ZIO.fail(
+                    new RuntimeException(
+                      s"Codeforces returned HTML (Cloudflare challenge?). First 200 chars: ${body.take(200)}",
+                    ),
+                  )
+                } else ZIO.succeed(body)
+              }
             }
-          }
+        }
       }
     }
 
