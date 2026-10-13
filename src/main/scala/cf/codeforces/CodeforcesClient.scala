@@ -73,7 +73,10 @@ class CodeforcesClient(
       cfgOpt.map(_ => "asManager" -> "true")
     request("contest.status", params).flatMap { json =>
       json.fromJson[CfApiResponse] match {
-        case Right(resp) if resp.status == "OK" => ZIO.succeed(resp.result.map(normalizeSubmission))
+        case Right(resp) if resp.status == "OK" =>
+          val submissions = resp.result.map(normalizeSubmission)
+          ZIO.logInfo(s"contest.status OK: contestId=$contestId, got ${submissions.size} submissions") *>
+            ZIO.succeed(submissions)
         case Right(resp) => ZIO.fail(new RuntimeException(s"API error: ${resp.comment.getOrElse("unknown")}"))
         case Left(err) => ZIO.logError(json) *> ZIO.fail(new RuntimeException(s"Parse error: $err"))
       }
