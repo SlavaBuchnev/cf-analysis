@@ -5,6 +5,7 @@ import scala.concurrent.duration.FiniteDuration
 import com.typesafe.config.ConfigMemorySize
 import pureconfig.ConfigReader
 
+/** Конфигурация встроенного HTTP-сервера (host, порт, лимиты и таймауты соединений). */
 final case class HttpServerConfig(
     host: String,
     port: Int,

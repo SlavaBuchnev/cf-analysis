@@ -1,7 +1,13 @@
 package cf.utils
 
+/** Нормализация названий языков программирования Codeforces.
+  *
+  * Приводит строковое название языка из посылки к канонической группе
+  * (например, `C++`, `Python`, `Java`). Неизвестные значения возвращаются как `Other`.
+  */
 object LanguageNormalizer {
 
+  /** Свести название языка к канонической группе (или `Other`, если не распознан). */
   def normalize(language: String): String =
     language.trim match {
       // --- C++ ---

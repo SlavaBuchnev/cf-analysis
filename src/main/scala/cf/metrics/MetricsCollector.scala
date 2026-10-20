@@ -9,6 +9,11 @@ import cf.models.CfSubmission
 import io.micrometer.core.instrument.Tags
 import io.micrometer.prometheusmetrics.{PrometheusConfig, PrometheusMeterRegistry}
 
+/** Сборщик метрик на базе Micrometer/Prometheus.
+  *
+  * Предоставляет единый [[PrometheusMeterRegistry]], обновление gauge-метрик и
+  * вспомогательные вычисления по посылкам (например, ограничения по времени).
+  */
 object MetricsCollector {
 
   val registry: PrometheusMeterRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT)

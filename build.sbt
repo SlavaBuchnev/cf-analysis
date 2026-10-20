@@ -30,4 +30,5 @@ lazy val root = rootProject
     libraryDependencies ++= Dependencies.common,
     Compile / mainClass := Some("Main"),
   )
+  .settings(ScaladocSettings.settings("cf-analysis"))
   .settings(DockerSettings.settings)

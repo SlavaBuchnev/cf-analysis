@@ -6,6 +6,10 @@ import zio.http.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
+/** Роуты для работы с фронтом
+  *
+  * Эндпоинт `GET / ` возвращает форму или 404
+  */
 object StaticRoutes {
 
   private val staticPrefix = "static"
