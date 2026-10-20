@@ -1,9 +1,10 @@
 package cf.routes
 
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 import zio.*
 import zio.http.*
+
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 object StaticRoutes {
 
@@ -18,7 +19,7 @@ object StaticRoutes {
       },
     )
 
-  private def serve(rawPath: String): Response = {
+  private def serve(rawPath: String): Response =
     safeStaticPath(rawPath) match {
       case Some(file) =>
         readResource(file) match {
@@ -27,7 +28,6 @@ object StaticRoutes {
         }
       case None => serveIndex()
     }
-  }
 
   private def safeStaticPath(rawPath: String): Option[String] = {
     val decoded = decodePath(rawPath).stripPrefix("/")
