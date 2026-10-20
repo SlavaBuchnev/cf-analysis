@@ -169,3 +169,28 @@ tr:hover td { background: #0f172a; }
     border: 1px solid #7f1d1d;
     color: #fecaca;
 }
+
+/* ---------- Раскладка и доп. секции ---------- */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .grid-2 { grid-template-columns: 1fr; }
+}
+
+.chart-tall {
+    height: 320px;
+    position: relative;
+}
+
+.chart-tall canvas {
+    max-height: 100%;
+}
+
+.small {
+    font-size: 0.75rem;
+    font-weight: 400;
+}
