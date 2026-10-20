@@ -15,7 +15,7 @@ Global / excludeLintKeys ++= Set(
 )
 
 lazy val root = rootProject
-  .enablePlugins(JavaAppPackaging, DockerPlugin, GitHubPagesPlugin)
+  .enablePlugins(JavaAppPackaging, DockerPlugin)
   .settings(
     scalacOptions ++= Dependencies.commonScalacOptions,
     libraryDependencies ++= Dependencies.common,
