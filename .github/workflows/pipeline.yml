@@ -42,6 +42,20 @@ jobs:
       - name: Generate Scaladoc
         run: sbt doc
 
+      - name: Debug target dir
+        run: |
+          echo "=== target tree (up to 4 levels) ==="
+          find target -maxdepth 4 -type d | sort
+          echo
+          echo "=== anything ending in /api ==="
+          find target -type d -name api
+          echo
+          echo "=== .html files under target ==="
+          find target -name '*.html' | head -20
+          echo
+          echo "=== resolved doc target per sbt ==="
+          sbt --error --batch "show Compile / doc / target" | tail -n1  
+
       - name: Prepare site directory
         run: |
           mkdir -p _site
