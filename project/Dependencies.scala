@@ -5,11 +5,25 @@ object Dependencies {
   val micrometerVersion = "1.17.1"
   val zioVersion = "2.1.26"
 
-  val commonScalacOptions = Seq(
+  /** Базовые опции компилятора, общие для всех конфигураций. */
+  val baseScalacOptions = Seq(
+    "-deprecation",
+    "-encoding",
+    "utf8",
+    "-feature",
+    "-unchecked",
+    "-language:implicitConversions",
+  )
+
+  /** Опции, специфичные для проекта (проверки кода). */
+  val strictScalacOptions = Seq(
     "-Wunused:imports", // предупреждения о неиспользованных import-ах
     "-Wconf:msg=unused import:e", // warnings → errors
     "-Wconf:msg=not be exhaustive:e", // неполный match → error
   )
+
+  /** Всё вместе — то, что подключается в build.sbt. */
+  val commonScalacOptions: Seq[String] = baseScalacOptions ++ strictScalacOptions
 
   val common: Seq[ModuleID] = Seq(
     "dev.zio" %% "zio" % zioVersion,
@@ -21,5 +35,7 @@ object Dependencies {
     "io.micrometer" % "micrometer-core" % micrometerVersion,
     "io.micrometer" % "micrometer-registry-prometheus" % micrometerVersion,
     "org.scalamock" %% "scalamock-zio" % "7.6.0" % Test,
+    "dev.zio" %% "zio-test" % zioVersion % Test,
+    "dev.zio" %% "zio-test-sbt" % zioVersion % Test,
   )
 }

@@ -1,13 +1,6 @@
-import zio.sbt.{ZioSbtCiPlugin, ZioSbtEcosystemPlugin}
-
 scalaVersion := "3.9.0"
 ThisBuild / name := "cf-analysis"
-
-inThisBuild(
-  List(
-    ciEnabledBranches := Seq("master"),
-  ),
-)
+ThisBuild / organization := "cf-analysis"
 
 Global / excludeLintKeys ++= Set(
   Debian / executableScriptName,
@@ -22,12 +15,11 @@ Global / excludeLintKeys ++= Set(
 )
 
 lazy val root = rootProject
-  .enablePlugins(ZioSbtEcosystemPlugin, ZioSbtCiPlugin, JavaAppPackaging, DockerPlugin)
-  .settings(stdSettings(Some("cf-analysis"), Some("cf")))
-  .settings(enableZIO())
+  .enablePlugins(JavaAppPackaging, DockerPlugin, GitHubPagesPlugin)
   .settings(
     scalacOptions ++= Dependencies.commonScalacOptions,
     libraryDependencies ++= Dependencies.common,
+    testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     Compile / mainClass := Some("Main"),
   )
   .settings(ScaladocSettings.settings("cf-analysis"))
