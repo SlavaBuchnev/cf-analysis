@@ -11,6 +11,11 @@ import cf.models.{CfApiResponse, CfSubmission}
 import cf.utils.LanguageNormalizer
 import nl.vroste.rezilience.RateLimiter as ZioRateLimiter
 
+/** Клиент для работы с публичным (и опционально аутентифицированным) API Codeforces.
+  *
+  * Обходит пагинацию через `getStatus`, применяет rate limiting и, при наличии
+  * [[CfAuthConfig]], подписывает запросы цифровой подписью API.
+  */
 class CodeforcesClient(
     client: Client,
     cfgOpt: Option[CfAuthConfig],

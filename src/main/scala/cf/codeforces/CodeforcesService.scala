@@ -4,8 +4,17 @@ import zio.{Task, ZIO, ZLayer}
 
 import cf.models.CfSubmission
 
+/** Сервис доступа к данным контестов Codeforces.
+  *
+  * Предоставляет операции загрузки посылок контеста, скрывая детали пагинации
+  * и работы с [[CodeforcesClient]].
+  */
 trait CodeforcesService {
+
+  /** Загрузить все посылки контеста (с пагинацией по страницам по 1000). */
   def loadFullContestData(contestId: Int): Task[List[CfSubmission]]
+
+  /** Получить последние `count` посылок контеста, отсортированные по id. */
   def fetchRecentStatuses(contestId: Int, count: Int): Task[List[CfSubmission]]
 }
 

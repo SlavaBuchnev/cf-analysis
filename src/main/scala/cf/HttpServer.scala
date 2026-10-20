@@ -6,6 +6,11 @@ import zio.http.Server
 import cf.configs.HttpServerConfig
 import cf.routes.HttpRoutes
 
+/** Запуск и конфигурация встроенного HTTP-сервера.
+  *
+  * Оборачивает [[HttpRoutes]] в сервер zio-http с настройками из [[HttpServerConfig]]
+  * (лимиты заголовков, keep-alive, таймауты, graceful shutdown).
+  */
 object HttpServer {
   val layer: ZLayer[HttpServerConfig & HttpRoutes, Throwable, Unit] =
     ZLayer.scoped {

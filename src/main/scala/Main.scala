@@ -8,6 +8,11 @@ import cf.metrics.MetricsCollector
 import cf.routes.HttpRoutes
 import cf.utils.RateLimiter
 
+/** Точка входа в приложение.
+  *
+  * Запускает [[cf.AppLifecycle]] внутри scoped-контекста и собирает всё необходимое окружение (конфигурацию, метрики,
+  * HTTP-роуты, кэш, клиент Codeforces, rate limiter) через [[zio.ZLayer]].
+  */
 object Main extends ZIOAppDefault {
 
   override def run: ZIO[ZIOAppArgs, Any, Any] =

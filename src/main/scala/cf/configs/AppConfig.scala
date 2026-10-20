@@ -4,6 +4,7 @@ import zio.{ZIO, ZLayer}
 
 import pureconfig.{ConfigReader, ConfigSource}
 
+/** Корневая конфигурация приложения, загружаемая из `application.conf` (секция `app`). */
 case class AppConfig(
     httpServer: HttpServerConfig,
     rateLimiter: RateLimiterConfig,
@@ -12,6 +13,8 @@ case class AppConfig(
 ) derives ConfigReader
 
 object AppConfig {
+
+  /** Полная конфигурация приложения (приватная, используется через проекции ниже). */
   private val layer: ZLayer[Any, Throwable, AppConfig] =
     ZLayer.fromZIO(ZIO.attempt(ConfigSource.default.at("app").loadOrThrow[AppConfig]))
 

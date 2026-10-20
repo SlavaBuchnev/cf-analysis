@@ -2,12 +2,22 @@ package cf.models
 
 import zio.json.{JsonDecoder, JsonEncoder}
 
+/** Ответ API Codeforces: обёртка над списком посылок.
+  *
+  * @param status
+  *   статус ответа (например, `"OK"` или `"FAILED"`)
+  * @param result
+  *   список посылок
+  * @param comment
+  *   опциональное сообщение (заполняется при ошибке)
+  */
 case class CfApiResponse(
     status: String,
     result: List[CfSubmission],
     comment: Option[String],
 ) derives JsonDecoder
 
+/** Задача контеста Codeforces. */
 case class CfProblem(
     contestId: Int,
     index: String,
@@ -32,6 +42,7 @@ case class CfParty(
 
 case class CfMember(handle: String) derives JsonDecoder, JsonEncoder
 
+/** Одна посылка участника в контесте Codeforces. */
 case class CfSubmission(
     id: Long,
     contestId: Int,

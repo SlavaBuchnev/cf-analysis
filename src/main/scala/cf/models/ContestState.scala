@@ -10,16 +10,27 @@ package cf.models
   */
 final case class ContestState(submissions: Map[Long, CfSubmission]) {
 
+  /** Максимальный id посылки в состоянии (0, если состояние пусто). */
   def lastId: Long = submissions.keys.maxOption.getOrElse(0L)
+
+  /** Количество посылок в состоянии. */
   def size: Int = submissions.size
+
+  /** Пусто ли состояние. */
   def isEmpty: Boolean = submissions.isEmpty
+
+  /** Непусто ли состояние. */
   def nonEmpty: Boolean = submissions.nonEmpty
+
+  /** Посылки, отсортированные по id по возрастанию. */
   def sorted: List[CfSubmission] = submissions.values.toList.sortBy(_.id)
 
+  /** Объединить текущее состояние с входящим списком посылок (upsert по id). */
   def merge(incoming: List[CfSubmission]): ContestState =
     if (incoming.isEmpty) this
     else copy(submissions = submissions ++ incoming.iterator.map(s => s.id -> s))
 
+  /** Количество посылок, добавленных по сравнению с `previous`. */
   def diffAdded(previous: ContestState): Int =
     submissions.keySet.diff(previous.submissions.keySet).size
 }
