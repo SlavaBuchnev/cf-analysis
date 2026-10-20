@@ -1,0 +1,196 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: #0f172a;
+    color: #e2e8f0;
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+}
+
+header {
+    border-bottom: 1px solid #334155;
+    padding: 1rem 2rem;
+    background: #1e293b;
+}
+
+header a {
+    color: #e2e8f0;
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+header a:hover { color: #38bdf8; }
+
+main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+h1 { font-size: 2rem; margin-bottom: 1rem; }
+h2 { font-size: 1.25rem; margin: 2rem 0 1rem; color: #cbd5e1; }
+
+.muted { color: #94a3b8; }
+.mono { font-family: ui-monospace, monospace; color: #38bdf8; }
+
+/* ---------- Главная ---------- */
+
+.home {
+    max-width: 500px;
+    margin: 4rem auto;
+    text-align: center;
+}
+
+.home p { margin-bottom: 2rem; }
+
+.search-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-form input,
+.search-form button {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    font-size: 1rem;
+}
+
+.search-form input {
+    flex: 1;
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+.search-form input:focus {
+    outline: none;
+    border-color: #38bdf8;
+}
+
+.search-form button {
+    background: #0284c7;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.search-form button:hover { background: #0369a1; }
+
+/* ---------- Контест ---------- */
+
+.back {
+    display: inline-block;
+    color: #38bdf8;
+    text-decoration: none;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.back:hover { color: #7dd3fc; }
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+}
+
+.chart-wrap {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 1.5rem;
+    max-width: 500px;
+}
+
+.table-wrap {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    font-size: 0.875rem;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 0.5rem;
+    color: #94a3b8;
+    font-weight: 500;
+    border-bottom: 1px solid #334155;
+}
+
+td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #1e293b;
+}
+
+tr:hover td { background: #0f172a; }
+
+/* ---------- Утилиты ---------- */
+
+.loading, .error {
+    padding: 2rem;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.loading { color: #94a3b8; }
+
+.error {
+    background: #450a0a;
+    border: 1px solid #7f1d1d;
+    color: #fecaca;
+}
+
+/* ---------- Раскладка и доп. секции ---------- */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+    .grid-2 { grid-template-columns: 1fr; }
+}
+
+.chart-tall {
+    height: 320px;
+    position: relative;
+}
+
+.chart-tall canvas {
+    max-height: 100%;
+}
+
+.small {
+    font-size: 0.75rem;
+    font-weight: 400;
+}
