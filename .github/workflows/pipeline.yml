@@ -42,13 +42,25 @@ jobs:
       - name: Generate Scaladoc
         run: sbt doc
 
+      - name: Locate and stage docs
+        run: |
+          API_DIR=$(find target -type d -name api -exec test -f {}/index.html \; -print -quit)
+          if [ -z "$API_DIR" ]; then
+            echo "::error::Не найден каталог api с index.html. Содержимое target:"
+            find target -maxdepth 4 -type d | sort
+            exit 1
+          fi
+          echo "Найден каталог документации: $API_DIR"
+          mkdir -p _site
+          cp -r "$API_DIR"/. _site/
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'target/out/jvm/scala-3.9.0/cf-analysis/root/api'
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
