@@ -1,10 +1,10 @@
 package cf.configs
 
-import zio.test.*
 import zio.Scope
+import zio.test.*
 
-import pureconfig.{ConfigReader, ConfigSource}
 import pureconfig.error.ConfigReaderFailures
+import pureconfig.{ConfigReader, ConfigSource}
 
 trait ConfigSpec[A: ConfigReader] extends ZIOSpecDefault {
 
