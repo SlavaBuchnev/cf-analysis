@@ -1,16 +1,20 @@
 package cf.routes
 
-import cf.codeforces.CodeforcesCache
-import zio.http.*
-import zio.json.*
 import zio.ZIO
+import zio.http.*
+import zio.http.Middleware.CorsConfig
+import zio.json.*
+
+import cf.codeforces.CodeforcesCache
 
 /** Роуты для работы с данными контестов Codeforces.
   *
-  * Эндпоинт `GET /api/contests/{id}` возвращает отсортированный список посылок
-  * контеста из кэша в формате JSON. При ошибке доступа к кэшу возвращает `500`.
+  * Эндпоинт `GET /api/contests/{id}` возвращает отсортированный список посылок контеста из кэша в формате JSON. При
+  * ошибке доступа к кэшу возвращает `500`.
   */
 object ContestsRoutes {
+
+  private val corsConfig: CorsConfig = CorsConfig(allowedOrigin = _ => None)
 
   val routes: Routes[CodeforcesCache, Response] =
     Routes(
@@ -23,5 +27,5 @@ object ContestsRoutes {
               state => ZIO.succeed(Response.json(state.sorted.toJson)),
             )
         },
-    )
+    ) @@ Middleware.cors(corsConfig)
 }

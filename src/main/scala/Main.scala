@@ -1,12 +1,12 @@
-import zio.{ZIO, ZIOAppArgs, ZIOAppDefault}
 import zio.http.Client
+import zio.{ZIO, ZIOAppArgs, ZIOAppDefault}
 
-import cf.{AppLifecycle, HttpServer}
 import cf.codeforces.{CodeforcesCache, CodeforcesClient, CodeforcesService}
 import cf.configs.AppConfig
 import cf.metrics.MetricsCollector
 import cf.routes.HttpRoutes
 import cf.utils.RateLimiter
+import cf.{AppLifecycle, HttpServer}
 
 /** Точка входа в приложение.
   *

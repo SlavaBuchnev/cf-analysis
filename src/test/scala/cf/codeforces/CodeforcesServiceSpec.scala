@@ -1,7 +1,7 @@
 package cf.codeforces
 
+import zio.test.{Spec, TestEnvironment, TestResult, assertTrue}
 import zio.{Scope, ZIO}
-import zio.test.{assertTrue, Spec, TestEnvironment, TestResult}
 
 import cf.models.Fixtures.submission
 import cf.utils.MockedSpec

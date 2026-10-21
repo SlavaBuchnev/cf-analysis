@@ -1,20 +1,21 @@
 package cf.codeforces
 
-import zio.{Chunk, Task, ZIO, ZLayer}
+import java.security.MessageDigest
+
 import zio.http.{Client, QueryParams, Request, URL}
 import zio.json.*
-
-import java.security.MessageDigest
+import zio.{Chunk, Task, ZIO, ZLayer}
 
 import cf.configs.CfAuthConfig
 import cf.models.{CfApiResponse, CfSubmission}
 import cf.utils.LanguageNormalizer
+
 import nl.vroste.rezilience.RateLimiter as ZioRateLimiter
 
 /** Клиент для работы с публичным (и опционально аутентифицированным) API Codeforces.
   *
-  * Обходит пагинацию через `getStatus`, применяет rate limiting и, при наличии
-  * [[CfAuthConfig]], подписывает запросы цифровой подписью API.
+  * Обходит пагинацию через `getStatus`, применяет rate limiting и, при наличии [[CfAuthConfig]], подписывает запросы
+  * цифровой подписью API.
   */
 class CodeforcesClient(
     client: Client,

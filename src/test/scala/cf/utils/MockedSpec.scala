@@ -1,7 +1,7 @@
 package cf.utils
 
-import zio.{Scope, Tag, ULayer, ZIO, ZLayer}
 import zio.test.{Spec, TestEnvironment, TestResult}
+import zio.{Scope, Tag, ULayer, ZIO, ZLayer}
 
 import org.scalamock.ziotest.ScalamockZIOSpec
 
