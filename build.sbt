@@ -21,7 +21,6 @@ lazy val root = rootProject
     libraryDependencies ++= Dependencies.common,
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     Compile / mainClass := Some("Main"),
-    wartremoverErrors ++= Warts.unsafe
   )
   .settings(ScaladocSettings.settings("cf-analysis"))
   .settings(DockerSettings.settings)
