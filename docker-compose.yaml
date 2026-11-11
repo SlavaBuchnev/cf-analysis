@@ -3,7 +3,7 @@ version: '3.8'
 services:
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.16.0
     container_name: cf-analysis-prometheus
     ports:
       - "9090:9090"
@@ -15,7 +15,7 @@ services:
       - "host.docker.internal:host-gateway"
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:13.3.1
     container_name: cf-analysis-grafana
     ports:
       - "3000:3000"

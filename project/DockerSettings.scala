@@ -1,5 +1,13 @@
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.*
-import com.typesafe.sbt.packager.Keys.{maintainer, packageName, executableScriptName}
+import com.typesafe.sbt.packager.Keys.{
+  daemonGroup,
+  daemonGroupGid,
+  daemonUser,
+  daemonUserUid,
+  executableScriptName,
+  maintainer,
+  packageName,
+}
 import sbt.*
 import sbt.Keys.*
 
@@ -7,7 +15,11 @@ import sbt.Keys.*
 object DockerSettings {
 
   val settings: Seq[Setting[?]] = Seq(
-    dockerBaseImage := "eclipse-temurin:17-jre-jammy",
+    dockerBaseImage := "eclipse-temurin:17.0.21_9-jre-jammy",
+    Docker / daemonUser := "app",
+    Docker / daemonGroup := "app",
+    Docker / daemonUserUid := Some("1001"),
+    Docker / daemonGroupGid := Some("1001"),
     dockerEntrypoint := Seq(
       s"bin/${executableScriptName.value}",
       "-J-XX:MaxRAMPercentage=75.0",
