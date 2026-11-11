@@ -14,7 +14,6 @@ sbt ciCheckGithubWorkflow
 sbt lint
 sbt test
 ```
-
 ```
-https://cf-analysis.onrender.com
+https://cf-analysis.up.railway.app/
 ```
