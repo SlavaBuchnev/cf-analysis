@@ -9,7 +9,7 @@ object DockerSettings {
   val settings: Seq[Setting[?]] = Seq(
     dockerBaseImage := "eclipse-temurin:17-jre-jammy",
     dockerEntrypoint := Seq(
-      "bin/cf-analysis",
+      s"bin/${executableScriptName.value}",
       "-J-XX:MaxRAMPercentage=75.0",
       "-J-XX:+UseZGC",
       "-J-XX:+UseContainerSupport",
@@ -17,7 +17,6 @@ object DockerSettings {
     dockerExposedPorts := Seq(8080),
     Docker / packageName := s"${sys.env.getOrElse("DOCKER_USERNAME", "cf-analysis")}/cf-analysis",
     Docker / version := sys.env.getOrElse("DOCKER_TAG", "latest"),
-    Docker / executableScriptName := "cf-analysis",
     Docker / maintainer := "Slava Buchnev <slavabuchnev5@gmail.com>",
     dockerLabels := Map(
       "maintainer" -> maintainer.value,
