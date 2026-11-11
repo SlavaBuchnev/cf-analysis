@@ -15,7 +15,7 @@ import sbt.Keys.*
 object DockerSettings {
 
   val settings: Seq[Setting[?]] = Seq(
-    dockerBaseImage := "eclipse-temurin:17.0.21_9-jre-jammy",
+    dockerBaseImage := "eclipse-temurin:25.0.5_8-jre-noble",
     Docker / daemonUser := "app",
     Docker / daemonGroup := "app",
     Docker / daemonUserUid := Some("1001"),
@@ -24,7 +24,6 @@ object DockerSettings {
       s"bin/${executableScriptName.value}",
       "-J-XX:MaxRAMPercentage=75.0",
       "-J-XX:+UseZGC",
-      "-J-XX:+UseContainerSupport",
     ),
     dockerExposedPorts := Seq(8080),
     Docker / packageName := s"${sys.env.getOrElse("DOCKER_USERNAME", "cf-analysis")}/cf-analysis",

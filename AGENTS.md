@@ -8,7 +8,7 @@
 
 ## Технологический стек
 
-- Scala **3.9.0**, sbt **2.0.8**, JDK **17** (eclipse-temurin)
+- Scala **3.9.0**, sbt **2.0.8**, JDK **25** (eclipse-temurin; образ приложения и CI на 25-й)
 - **ZIO 2.1.26**: zio-http 3.11.4 (сервер и клиент), zio-cache 0.3.0, zio-json (`derives JsonDecoder/JsonEncoder`)
 - **pureconfig-core** 0.17.10 — загрузка HOCON-конфигурации (секция `app` в `application.conf`)
 - **rezilience** 0.10.5 — rate limiter для запросов к Codeforces
@@ -70,9 +70,10 @@ sbt doc                   # Scaladoc (настройки в project/ScaladocSett
 `.run/runMain.run.xml`). Обратите внимание: `cf-api` формально `Option` в модели, но подстановки
 `${KEY}`/`${SECRET}` разрешаются при загрузке конфигурации — без этих переменных приложение не стартует.
 
-Docker-образ: база `eclipse-temurin:17.0.21_9-jre-jammy` (закреплённая версия, не плавающий тег),
-порт 8080, JVM-флаги `-XX:MaxRAMPercentage=75.0`, `+UseZGC`, `+UseContainerSupport`;
-имя скрипта запуска — `cf-analysis` (`executableScriptName`). Контейнер работает под непривилегированным
+Docker-образ: база `eclipse-temurin:25.0.5_8-jre-noble` (закреплённая версия, не плавающий тег),
+порт 8080, JVM-флаги `-XX:MaxRAMPercentage=75.0`, `+UseZGC` (на JDK 25 это Generational ZGC;
+`-XX:+UseContainerSupport` убран — no-op с JDK 10). Имя скрипта запуска — `cf-analysis`
+(`executableScriptName`). Контейнер работает под непривилегированным
 пользователем `app` (uid/gid 1001, `Docker / daemonUser[Uid]`/`daemonGroup[Gid]` в `project/DockerSettings.scala`;
 без явного gid плагин пропускает создание группы и `COPY --chown=app:app` падает). В корне лежит
 `.dockerignore` (VCS/IDE/target/секреты/локальная инфраструктура наблюдения) — для сборок из корня
@@ -88,6 +89,8 @@ Docker-образ: база `eclipse-temurin:17.0.21_9-jre-jammy` (закреп�
 - Временная логика тестируется через `TestClock.adjust` (см. `RateLimiterSpec`, `CodeforcesCacheSpec`).
 - Кэш в тестах конфигурируется маленькими значениями TTL (см. `baseConfig` в `CodeforcesCacheSpec`).
 - Внешний API Codeforces в тестах не дёргается — мокается `CodeforcesClient`/`CodeforcesService`.
+- В sbt 2.x `sbt test` — инкрементальный (прогоняет testQuick), при «зелёном» прошлом прогоне
+  может запустить 0 тестов. Полный прогон вручную: `sbt "Test / testFull"`.
 
 ## Стиль кода
 
@@ -117,7 +120,7 @@ Docker-образ: база `eclipse-temurin:17.0.21_9-jre-jammy` (закреп�
 ## CI/CD и деплой
 
 - `.github/workflows/pipeline.yml` (на пуш в любую ветку):
-  - `testing` — `sbt test` (JDK 17 temurin, кэш sbt; общий шаг — `.github/setup-scala/action.yml`)
+  - `testing` — `sbt test` (JDK 25 temurin, кэш sbt; общий шаг — `.github/setup-scala/action.yml`)
   - `documentation` (только `master`) — `sbt doc`, публикация на GitHub Pages
   - `publish` — `sbt Docker/publish` в Docker Hub; тег: `master-latest` для master, иначе `dev-latest`
     (env `DOCKER_TAG`, `DOCKER_USERNAME`; пароль — secret `DOCKER_PASSWORD`)
