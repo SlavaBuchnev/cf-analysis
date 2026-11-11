@@ -1,5 +1,5 @@
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.*
-import com.typesafe.sbt.packager.Keys.{maintainer, packageName}
+import com.typesafe.sbt.packager.Keys.{maintainer, packageName, executableScriptName}
 import sbt.*
 import sbt.Keys.*
 
@@ -17,6 +17,7 @@ object DockerSettings {
     dockerExposedPorts := Seq(8080),
     Docker / packageName := s"${sys.env.getOrElse("DOCKER_USERNAME", "cf-analysis")}/cf-analysis",
     Docker / version := sys.env.getOrElse("DOCKER_TAG", "latest"),
+    Docker / executableScriptName := "cf-analysis",
     Docker / maintainer := "Slava Buchnev <slavabuchnev5@gmail.com>",
     dockerLabels := Map(
       "maintainer" -> maintainer.value,
