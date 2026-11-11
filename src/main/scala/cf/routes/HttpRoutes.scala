@@ -14,7 +14,7 @@ final case class HttpRoutes(routes: Routes[Any, Response])
 
 object HttpRoutes {
   private val routes: Routes[CodeforcesCache & PrometheusMeterRegistry, Response] =
-    ContestsRoutes.routes ++ MetricsRoutes.routes ++ HealthRoutes.routes
+    ContestsRoutes.routes ++ MetricsRoutes.routes ++ HealthRoutes.routes ++ StaticRoutes.routes
 
   val layer: ZLayer[CodeforcesCache & PrometheusMeterRegistry, Nothing, HttpRoutes] =
     ZLayer.fromZIO {
