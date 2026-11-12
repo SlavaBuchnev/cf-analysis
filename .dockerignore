@@ -1,0 +1,20 @@
+# VCS
+.git/
+.gitignore
+
+# IDE и локальные окружения разработки
+.idea/
+.run/
+.vscode/
+
+# Секреты и локальные переменные окружения
+.env
+
+# Сборка sbt и артефакты тестов
+**/target/
+
+# Локальная инфраструктура наблюдения (не нужна в образе приложения)
+docker-compose.yaml
+prometheus.yml
+grafana/
+datasource.yml/
