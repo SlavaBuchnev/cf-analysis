@@ -1,5 +1,3 @@
-import com.typesafe.sbt.packager.Keys.{maintainer, packageName}
-import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.*
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.*
 import com.typesafe.sbt.packager.Keys.{
   daemonGroup,
