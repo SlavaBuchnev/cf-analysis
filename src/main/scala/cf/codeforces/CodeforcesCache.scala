@@ -1,8 +1,9 @@
 package cf.codeforces
 
 import scala.concurrent.duration.FiniteDuration
-import zio.{Clock, Duration, Ref, Task, UIO, ZIO, ZLayer}
+
 import zio.cache.{Cache, Lookup}
+import zio.{Clock, Duration, Ref, Task, UIO, ZIO, ZLayer}
 
 import cf.configs.CacheConfig
 import cf.metrics.MetricsCollector
@@ -10,9 +11,8 @@ import cf.models.{ContestEntry, ContestState}
 
 /** Кэш состояний контестов Codeforces.
   *
-  * Хранит по каждому контесту [[cf.models.ContestState]] с учётом политики
-  * обновления (`refreshAfter`) и простоя (`idleTtl`), а также умеет прогреваться
-  * при старте и вытеснять неактивные контесты.
+  * Хранит по каждому контесту [[cf.models.ContestState]] с учётом политики обновления (`refreshAfter`) и простоя
+  * (`idleTtl`), а также умеет прогреваться при старте и вытеснять неактивные контесты.
   */
 trait CodeforcesCache {
   def get(contestId: Int): Task[ContestState]

@@ -1,7 +1,7 @@
 package cf.routes
 
-import zio.http.*
 import zio.ZIO
+import zio.http.*
 
 /** Роуты для проверки живости сервиса.
   *

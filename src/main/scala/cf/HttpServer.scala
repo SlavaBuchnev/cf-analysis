@@ -1,15 +1,15 @@
 package cf
 
-import zio.{Duration, ZIO, ZLayer}
 import zio.http.Server
+import zio.{Duration, ZIO, ZLayer}
 
 import cf.configs.HttpServerConfig
 import cf.routes.HttpRoutes
 
 /** Запуск и конфигурация встроенного HTTP-сервера.
   *
-  * Оборачивает [[HttpRoutes]] в сервер zio-http с настройками из [[HttpServerConfig]]
-  * (лимиты заголовков, keep-alive, таймауты, graceful shutdown).
+  * Оборачивает [[HttpRoutes]] в сервер zio-http с настройками из [[HttpServerConfig]] (лимиты заголовков, keep-alive,
+  * таймауты, graceful shutdown).
   */
 object HttpServer {
   val layer: ZLayer[HttpServerConfig & HttpRoutes, Throwable, Unit] =

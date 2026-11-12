@@ -1,8 +1,8 @@
 package cf.routes
 
-import zio.{Scope, ULayer, ZIO}
 import zio.http.{Response, Routes, Status}
-import zio.test.{assertTrue, Spec, TestEnvironment}
+import zio.test.{Spec, TestEnvironment, assertTrue}
+import zio.{Scope, ULayer, ZIO}
 
 import cf.codeforces.CodeforcesCache
 import cf.models.ContestState

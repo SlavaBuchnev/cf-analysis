@@ -1,18 +1,19 @@
 package cf.metrics
 
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
+
 import zio.{ZIO, ZLayer}
 
-import java.util.concurrent.atomic.AtomicReference
-import java.util.concurrent.ConcurrentHashMap
-
 import cf.models.CfSubmission
+
 import io.micrometer.core.instrument.Tags
 import io.micrometer.prometheusmetrics.{PrometheusConfig, PrometheusMeterRegistry}
 
 /** Сборщик метрик на базе Micrometer/Prometheus.
   *
-  * Предоставляет единый [[PrometheusMeterRegistry]], обновление gauge-метрик и
-  * вспомогательные вычисления по посылкам (например, ограничения по времени).
+  * Предоставляет единый [[PrometheusMeterRegistry]], обновление gauge-метрик и вспомогательные вычисления по посылкам
+  * (например, ограничения по времени).
   */
 object MetricsCollector {
 

@@ -1,8 +1,9 @@
 package cf.configs
 
 import scala.concurrent.duration._
-import zio.test.assertTrue
+
 import zio.test.TestResult
+import zio.test.assertTrue
 
 object CacheConfigSpec extends ConfigSpec[CacheConfig] {
   override val configPath: String = "cache"

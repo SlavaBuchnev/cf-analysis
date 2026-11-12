@@ -1,14 +1,16 @@
 package cf.routes
 
-import cf.codeforces.CodeforcesCache
-import zio.{ZIO, ZLayer}
 import zio.http.{Response, Routes}
+import zio.{ZIO, ZLayer}
+
+import cf.codeforces.CodeforcesCache
+
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 
 /** Все HTTP-роуты приложения, собранные в один `Routes[Any, Response]`.
   *
-  * Объединяет [[ContestsRoutes]], [[MetricsRoutes]] и [[HealthRoutes]] и внедряет
-  * необходимое окружение (`CodeforcesCache` и `PrometheusMeterRegistry`).
+  * Объединяет [[ContestsRoutes]], [[MetricsRoutes]] и [[HealthRoutes]] и внедряет необходимое окружение
+  * (`CodeforcesCache` и `PrometheusMeterRegistry`).
   */
 final case class HttpRoutes(routes: Routes[Any, Response])
 

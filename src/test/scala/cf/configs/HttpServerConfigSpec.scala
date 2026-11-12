@@ -1,6 +1,7 @@
 package cf.configs
 
 import scala.concurrent.duration.DurationInt
+
 import zio.test.*
 
 import com.typesafe.config.ConfigMemorySize
