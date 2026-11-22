@@ -24,6 +24,7 @@ object Main extends ZIOAppDefault {
         AppConfig.cfApiCfgOptLayer,
         AppConfig.httpServerCfgLayer,
         AppConfig.cacheCfgLayer,
+        AppConfig.corsCfgLayer,
         // metrics
         MetricsCollector.layer,
         // routes
