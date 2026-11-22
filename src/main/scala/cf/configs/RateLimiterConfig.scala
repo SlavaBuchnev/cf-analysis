@@ -1,8 +1,8 @@
 package cf.configs
 
-import pureconfig.ConfigReader
-
 import scala.concurrent.duration.FiniteDuration
+
+import pureconfig.ConfigReader
 
 /** Конфигурация rate limiter'а: максимальное число запросов за интервал времени. */
 case class RateLimiterConfig(

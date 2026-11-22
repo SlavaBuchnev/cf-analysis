@@ -1,14 +1,15 @@
 package cf.routes
 
-import cf.codeforces.CodeforcesCache
+import zio.ZIO
 import zio.http.*
 import zio.json.*
-import zio.ZIO
+
+import cf.codeforces.CodeforcesCache
 
 /** Роуты для работы с данными контестов Codeforces.
   *
-  * Эндпоинт `GET /api/contests/{id}` возвращает отсортированный список посылок
-  * контеста из кэша в формате JSON. При ошибке доступа к кэшу возвращает `500`.
+  * Эндпоинт `GET /api/contests/{id}` возвращает отсортированный список посылок контеста из кэша в формате JSON. При
+  * ошибке доступа к кэшу возвращает `500`. CORS-middleware применяется на уровне `HttpRoutes`.
   */
 object ContestsRoutes {
 

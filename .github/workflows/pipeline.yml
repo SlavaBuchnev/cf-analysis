@@ -15,6 +15,12 @@ jobs:
       - name: Setup Scala
         uses: ./.github/setup-scala
 
+      - name: Compile
+        run: sbt Test/compile
+
+      - name: Check formatting
+        run: sbt scalafmtCheckAll
+
       - name: Unit test
         run: sbt test
 

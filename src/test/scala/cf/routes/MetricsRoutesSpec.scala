@@ -5,6 +5,7 @@ import zio.http._
 import zio.test._
 
 import cf.utils.RoutesSpec
+
 import io.micrometer.core.instrument.Counter
 import io.micrometer.prometheusmetrics.{PrometheusConfig, PrometheusMeterRegistry}
 

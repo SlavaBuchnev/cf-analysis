@@ -3,12 +3,13 @@ package cf.utils
 import zio.{Duration, ZIO, ZLayer}
 
 import cf.configs.RateLimiterConfig
+
 import nl.vroste.rezilience.RateLimiter as ZioRateLimiter
 
 /** Настройка и создание rate limiter'а для ограничения запросов к Codeforces API.
   *
-  * Создаёт [[ZioRateLimiter]] на основе [[RateLimiterConfig]], а также предоставляет
-  * `noop`-реализацию, пропускающую все запросы без ограничений.
+  * Создаёт [[ZioRateLimiter]] на основе [[RateLimiterConfig]], а также предоставляет `noop`-реализацию, пропускающую
+  * все запросы без ограничений.
   */
 object RateLimiter {
   val layer: ZLayer[RateLimiterConfig, Throwable, ZioRateLimiter] =

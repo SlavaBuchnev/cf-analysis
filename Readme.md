@@ -4,15 +4,9 @@
 - Чтобы пользователь был в группе и был менеджером контеста(если не будет менеджером будет возвращать что контеста нет)
 
 ```bash
-# Сгенерировать workflow
-sbt ciGenerateGithubWorkflow
-
-# Проверить, что workflow соответствует настройкам
-sbt ciCheckGithubWorkflow
-
 # Локально прогнать те же проверки, что и в CI
-sbt lint
-sbt test
+sbt lint        # проверка форматирования (scalafmtCheckAll)
+sbt test        # тесты
 ```
 ```
 https://cf-analysis.up.railway.app/

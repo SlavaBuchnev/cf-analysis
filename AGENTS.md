@@ -15,7 +15,8 @@
 - **Micrometer** 1.17.1 + `micrometer-registry-prometheus` — метрики, endpoint `/metrics`
 - logback-classic 1.6.3 — логирование (конфиг `src/main/resources/logback.xml`)
 - Тесты: **zio-test** + **scalamock-zio** 7.6.0
-- Плагин sbt: только `sbt-native-packager` 1.12.0 (JavaAppPackaging + DockerPlugin)
+- Плагины sbt: `sbt-native-packager` 1.12.0 (JavaAppPackaging + DockerPlugin) и `sbt-scalafmt` 2.6.1
+  (алиас `lint` = `scalafmtCheckAll`, та же проверка гейтом в CI до тестов)
 - Фронтенд: статика в `src/main/resources/static` (без сборщика, Chart.js UMD лежит в репозитории)
 
 ## Структура кода
@@ -41,7 +42,8 @@
   `ContestState` (`Map[id -> submission]`, upsert при merge, дедупликация), `ContestEntry`
 - `cf.routes` — `ContestsRoutes` (`GET /api/contests/{id}`), `MetricsRoutes` (`GET /metrics`),
   `HealthRoutes` (`GET /ping`), `StaticRoutes` (отдача SPA из classpath, защита от path traversal,
-  fallback на index.html), `HttpRoutes` — агрегация всех роутов в один `Routes[Any, Response]`
+  fallback на index.html), `HttpRoutes` — агрегация всех роутов в один `Routes[Any, Response]`,
+  при `cors.enabled` оборачивание всего дерева в `Middleware.cors` (см. `CorsConfig`)
 - `cf.metrics.MetricsCollector` — **синглтон** `PrometheusMeterRegistry`, gauge-метрики `cf_user_*`
   по хендлам/задачам/языкам (обновление через `AtomicReference` в `ConcurrentHashMap`)
 - `cf.utils` — `RateLimiter` (слой поверх rezilience, есть `noop`-реализация для тестов),
@@ -56,6 +58,7 @@
 
 ```bash
 sbt compile        # компиляция
+sbt lint           # проверка форматирования (scalafmtCheckAll, тот же шаг гейтом в CI)
 sbt test           # тесты (зелёные на момент написания)
 sbt run            # запуск Main; требуются env-переменные (см. ниже)
 
@@ -113,6 +116,8 @@ Docker-образ: база `eclipse-temurin:25.0.5_8-jre-noble` (закрепл
 - `http-server` — `host`, `port` (из env), лимиты заголовков/initial line, `keep-alive`, таймауты
 - `rate-limiter` — `max` запросов за `interval` (по умолчанию 1 запрос / 2 секунды)
 - `cf-api` — `key`, `secret` (из env)
+- `cors` — `enabled`, `allowed-origins`, `allowed-methods`, `allowed-headers`, `max-age`
+  (по умолчанию выключено: SPA отдаётся с того же origin; origin разрешается точным совпадением строки)
 
 Важно про Codeforces API (из Readme.md): чтобы `contest.status` работал с `asManager=true`,
 владелец apiKey должен быть **менеджером контеста**, иначе API отвечает, будто контеста не существует.
@@ -130,9 +135,9 @@ Docker-образ: база `eclipse-temurin:25.0.5_8-jre-noble` (закрепл
 - Readme.md указывает живой адрес `https://cf-analysis.up.railway.app/` и бейдж внешнего healthcheck
   cron-job.org — это более старая площадка; актуальный деплой описан в `deploy.yml` (Render).
 
-⚠️ Команды из Readme — `sbt ciGenerateGithubWorkflow`, `sbt ciCheckGithubWorkflow`, `sbt lint` — в
-текущей сборке **не определены** (в `build.sbt`/`plugins.sbt` их нет, workflow'ы правятся вручную).
-Не полагайтесь на них; локальная проверка — это `sbt test`.
+⚠️ Команды из Readme `sbt ciGenerateGithubWorkflow` и `sbt ciCheckGithubWorkflow` в текущей сборке
+**не определены** (плагина sbt-github-actions нет, workflow'ы правятся вручную). `sbt lint` определён —
+это `scalafmtCheckAll`; локальная проверка — `sbt lint` + `sbt test`.
 
 ## Мониторинг
 

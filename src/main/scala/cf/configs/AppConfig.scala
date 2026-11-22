@@ -10,6 +10,7 @@ case class AppConfig(
     rateLimiter: RateLimiterConfig,
     cfApi: Option[CfAuthConfig],
     cache: CacheConfig,
+    cors: CorsConfig,
 ) derives ConfigReader
 
 object AppConfig {
@@ -25,4 +26,6 @@ object AppConfig {
   val httpServerCfgLayer: ZLayer[Any, Throwable, HttpServerConfig] = layer.project(_.httpServer)
 
   val cacheCfgLayer: ZLayer[Any, Throwable, CacheConfig] = layer.project(_.cache)
+
+  val corsCfgLayer: ZLayer[Any, Throwable, CorsConfig] = layer.project(_.cors)
 }

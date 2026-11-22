@@ -1,10 +1,12 @@
 package cf.utils
 
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
-import zio.{Duration, Scope, ZIO, ZLayer}
+
 import zio.test.*
+import zio.{Duration, Scope, ZIO, ZLayer}
 
 import cf.configs.RateLimiterConfig
+
 import nl.vroste.rezilience.RateLimiter as ZioRateLimiter
 
 object RateLimiterSpec extends ZIOSpecDefault {

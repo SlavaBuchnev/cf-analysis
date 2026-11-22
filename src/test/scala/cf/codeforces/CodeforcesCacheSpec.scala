@@ -1,6 +1,7 @@
 package cf.codeforces
 
 import scala.concurrent.duration.*
+
 import zio.*
 import zio.test.*
 

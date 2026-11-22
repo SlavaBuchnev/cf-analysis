@@ -1,7 +1,7 @@
 package cf.models
 
 import zio.json.DecoderOps
-import zio.test.{assertTrue, ZIOSpecDefault}
+import zio.test.{ZIOSpecDefault, assertTrue}
 
 object CfModelsSpec extends ZIOSpecDefault {
 
