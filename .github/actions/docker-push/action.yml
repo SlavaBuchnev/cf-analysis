@@ -1,5 +1,5 @@
 name: Push Docker image to a registry
-description: Логин в registry и пуш образа (при необходимости — с предварительным перетегированием)
+description: Логин в registry и пуш образа под одним или несколькими тегами (при необходимости — с предварительным перетегированием)
 
 inputs:
   registry:
@@ -17,8 +17,8 @@ inputs:
   target-image:
     description: Полное имя образа в целевом registry без тега (напр. ghcr.io/owner/repo)
     required: true
-  tag:
-    description: Тег для пуша
+  tags:
+    description: Список тегов через пробел (напр. "master-latest latest")
     required: true
 
 runs:
@@ -34,9 +34,11 @@ runs:
     - name: Tag and push
       shell: bash
       run: |
-        docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE:$TAG"
-        docker push "$TARGET_IMAGE:$TAG"
+        for TAG in $TAGS; do
+          docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE:$TAG"
+          docker push "$TARGET_IMAGE:$TAG"
+        done
       env:
         SOURCE_IMAGE: ${{ inputs.source-image }}
         TARGET_IMAGE: ${{ inputs.target-image }}
-        TAG: ${{ inputs.tag }}
+        TAGS: ${{ inputs.tags }}

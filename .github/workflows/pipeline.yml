@@ -116,7 +116,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           source-image: ${{ secrets.DOCKER_USERNAME }}/cf-analysis:${{ steps.tag.outputs.tag }}
           target-image: ${{ secrets.DOCKER_USERNAME }}/cf-analysis
-          tag: ${{ steps.tag.outputs.tag }}
+          tags: ${{ steps.tag.outputs.tag }}
 
       - name: Publish to GitHub Packages (только master)
         if: github.ref_name == 'master'
@@ -127,4 +127,5 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           source-image: ${{ secrets.DOCKER_USERNAME }}/cf-analysis:${{ steps.tag.outputs.tag }}
           target-image: ${{ steps.ghcr.outputs.image }}
-          tag: ${{ steps.tag.outputs.tag }}
+          # latest — мутабельный указатель на последний зелёный master (в ghcr он однозначен: туда пушится только master)
+          tags: ${{ steps.tag.outputs.tag }} latest
