@@ -28,7 +28,9 @@ final case class TransientCfError(message: String, cause: Option[Throwable] = No
   * Подписывает запросы цифровой подписью API (`apiSig`) на основе [[cf.configs.CfAuthConfig]], добавляет `time` и
   * `asManager=true`. Каждый запрос обёрнут в цепочку устойчивости: rate limit → retry → circuit breaker (политики из
   * `cf-api.http-client`; ретраятся и размыкают цепь только транзиентные ошибки). В логи уходят только безопасные
-  * параметры запроса — `apiKey`/`apiSig` маскируются (полный URI — только при явном флаге `log-full-uri`).
+  * параметры запроса — `apiKey`/`apiSig` маскируются (полный URI — только при явном флаге `log-full-uri`); ошибки
+  * транспорта логируются без URI — сообщение строится из имени метода и класса исключения, оригинальный `Throwable` в
+  * cause не сохраняется (у sttp сообщение исключения содержит полный URI запроса).
   */
 class CodeforcesClient(
     backend: SttpClient,
@@ -96,7 +98,9 @@ class CodeforcesClient(
         logRequest(method, uri, params) *>
           backend
             .send(req)
-            .mapError(e => TransientCfError(s"HTTP request failed: ${e.getMessage}", Some(e)))
+            // сообщение исключения sttp содержит полный URI (apiKey/apiSig) — логируем только класс исключения,
+            // оригинальный throwable в cause не сохраняем, чтобы секреты не утекли через logErrorCause
+            .mapError(e => TransientCfError(s"$method failed: ${e.getClass.getSimpleName}"))
             .flatMap(response => handleResponse(method, response.code, response.body))
       }
     }
