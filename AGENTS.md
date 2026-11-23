@@ -142,10 +142,12 @@ Docker-образ: база `eclipse-temurin:25.0.5_8-jre-noble` (закрепл
   - `testing` — `sbt test` (JDK 25 temurin, кэш sbt; общий шаг — `.github/actions/setup-scala`)
   - `documentation` (только `master`) — `sbt doc`, публикация на GitHub Pages
   - `publish` — `sbt Docker/publishLocal` (сборка образа без пуша) + два вызова общего composite action
-    `.github/actions/docker-push` (логин → tag → push): в Docker Hub (с любой ветки) и в GitHub Packages
-    **только с master** (`ghcr.io/slavabuchnev/cf-analysis`, имя репозитория приводится к lowercase — GHCR его требует);
-    тег: `master-latest` для master, иначе `dev-latest` (env `DOCKER_TAG`, `DOCKER_USERNAME`; пароль Docker Hub —
-    secret `DOCKER_PASSWORD`, в ghcr.io — `GITHUB_TOKEN` с правом `packages: write`)
+    `.github/actions/docker-push` (логин → tag → push, вход `tags` — список тегов через пробел): в Docker Hub (с любой
+    ветки) и в GitHub Packages **только с master** (`ghcr.io/slavabuchnev/cf-analysis`, имя репозитория приводится к
+    lowercase — GHCR его требует); тег: `master-latest` для master, иначе `dev-latest`, плюс в ghcr.io мутабельный
+    `latest` — указатель на последний зелёный master (для откатов использовать неизменяемый `master-latest`)
+    (env `DOCKER_TAG`, `DOCKER_USERNAME`; пароль Docker Hub — secret `DOCKER_PASSWORD`, в ghcr.io — `GITHUB_TOKEN`
+    с правом `packages: write`)
 - `.github/workflows/deploy.yml` — ручной запуск: у сервиса Render обновляется image path и
   стартует деплой через hook, затем статус деплоя поллится до `live` (до 20 минут).
   Secrets: `RENDER_API_KEY`, `RENDER_DEV_SERVICE_ID`, `RENDER_DEV_DEPLOY_HOOK_URL`, `DOCKER_USERNAME`.
