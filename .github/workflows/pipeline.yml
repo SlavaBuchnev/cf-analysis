@@ -129,3 +129,13 @@ jobs:
           target-image: ${{ steps.ghcr.outputs.image }}
           # latest — мутабельный указатель на последний зелёный master (в ghcr он однозначен: туда пушится только master)
           tags: ${{ steps.tag.outputs.tag }} latest
+
+      # Описание репозитория Docker Hub обновляем только из master, чтобы фича-ветки не затирали витрину
+      - name: Update Docker Hub description
+        if: github.ref_name == 'master'
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: ${{ secrets.DOCKER_USERNAME }}/cf-analysis
+          readme-filepath: ./Readme.md
