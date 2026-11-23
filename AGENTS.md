@@ -38,7 +38,8 @@
     безопасные параметры (`apiKey`/`apiSig` маскируются, полный URI — по флагу `log-full-uri`).
     Политики строятся из `cf-api.http-client` (`CircuitBreakerConfig.build`)
   - `CodeforcesService` — бизнес-операции: `loadFullContestData` (пагинация страницами по 1000, аккумулятор на
-    `Vector`, остановка при повторе уже полученных посылок — защита от аномалий API), `fetchRecentStatuses`
+    `Vector`, остановка при повторе уже полученных посылок и при лимите `cf-api.max-submissions` — защита от аномалий
+    API), `fetchRecentStatuses`
   - `CodeforcesCache` — кэш на `zio.cache.Cache` + `Ref`: политики `refreshAfter` / `idleTtl`,
     warmup по `warmupContestIds`, `evictIdle`
 - `cf.configs` — кейс-классы конфигурации (`derives ConfigReader`) + `AppConfig`: приватный слой
@@ -121,8 +122,10 @@ Docker-образ: база `eclipse-temurin:25.0.5_8-jre-noble` (закрепл
 - `http-server` — `host`, `port` (из env), лимиты заголовков/initial line, `keep-alive`, таймауты
 - `rate-limiter` — `max` запросов за `interval` (по умолчанию 1 запрос / 2 секунды)
 - `cf-api` — `key`, `secret` (из env), `log-full-uri` (дефолт `false`: логировать полный URI с секретами — только
-  для отладки) и вложенный `http-client`: таймауты (`request-timeout` — read-таймаут запроса, `connection-timeout` —
-  установка соединения), retry (`retry-base-delay`, `retry-max-delay`, `retry-max-attempts`), `circuit-breaker`
+  для отладки), `max-submissions` (лимит полной загрузки контеста в посылках, дефолт 200k: при достижении пагинация
+  останавливается, возвращается накопленное) и вложенный `http-client`: таймауты (`request-timeout` — read-таймаут
+  запроса, `connection-timeout` — установка соединения), retry (`retry-base-delay`, `retry-max-delay`,
+  `retry-max-attempts`), `circuit-breaker`
 - `circuit-breaker` (типизированный ридер, см. `CircuitBreakerConfig`) — `type` (`failure-count` | `failure-rate`),
   общий `reset-timeout` и блок `parameters` с настройками стратегии: `max-failures` для `failure-count`;
   `failure-rate-threshold` (0..1) и опциональные `sample-duration`/`min-throughput` (дефолты как в rezilience) для

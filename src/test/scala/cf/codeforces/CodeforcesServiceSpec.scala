@@ -1,8 +1,11 @@
 package cf.codeforces
 
-import zio.test.{Spec, TestEnvironment, TestResult, assertTrue}
-import zio.{Scope, ZIO}
+import scala.concurrent.duration.DurationInt
 
+import zio.test.{Spec, TestEnvironment, TestResult, assertTrue}
+import zio.{Scope, ULayer, ZIO, ZLayer}
+
+import cf.configs.{CfAuthConfig, CircuitBreakerConfig, HttpClientConfig}
 import cf.models.Fixtures.submission
 import cf.utils.MockedSpec
 
@@ -14,12 +17,33 @@ object CodeforcesServiceSpec extends MockedSpec {
       fetchRecentStatusesTests,
     )
 
-  private def test(label: String)(
+  /** Тестовая конфигурация с заданным лимитом пагинации. */
+  private def authConfig(maxSubmissions: Int): CfAuthConfig =
+    CfAuthConfig(
+      key = "key",
+      secret = "secret",
+      logFullUri = false,
+      maxSubmissions = maxSubmissions,
+      httpClient = HttpClientConfig(
+        requestTimeout = 30.seconds,
+        connectionTimeout = 10.seconds,
+        retryBaseDelay = 1.second,
+        retryMaxDelay = 15.seconds,
+        retryMaxAttempts = 5,
+        circuitBreaker = CircuitBreakerConfig.FailureCount(5, 30.seconds),
+      ),
+    )
+
+  private def authConfigLayer(maxSubmissions: Int): ULayer[CfAuthConfig] =
+    ZLayer.succeed(authConfig(maxSubmissions))
+
+  private def test(label: String, maxSubmissions: Int = Int.MaxValue)(
       f: (CodeforcesClient, CodeforcesService) => ZIO[Any, Throwable, TestResult],
   ): Spec[TestEnvironment & Scope, Any] =
-    testWithMock[CodeforcesClient, CodeforcesService](
+    testWithMock[CodeforcesClient, CfAuthConfig, CodeforcesService](
       label,
       mock[CodeforcesClient],
+      authConfigLayer(maxSubmissions),
       CodeforcesService.layer,
     )(f)
 
@@ -88,6 +112,14 @@ object CodeforcesServiceSpec extends MockedSpec {
           result.head.id == 1L,
           result.last.id == 1000L,
         )
+      },
+      test("stops and truncates when max submissions limit is reached", maxSubmissions = 3) { (client, service) =>
+        client.getStatus
+          .expects(1, Some(1), Some(1000))
+          .returnsZIO((1 to 5).map(i => submission(id = i.toLong)).toList)
+        for {
+          result <- service.loadFullContestData(1)
+        } yield assertTrue(result.map(_.id) == List(1L, 2L, 3L))
       },
     )
 
