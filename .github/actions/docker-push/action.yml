@@ -1,0 +1,42 @@
+name: Push Docker image to a registry
+description: Логин в registry и пуш образа (при необходимости — с предварительным перетегированием)
+
+inputs:
+  registry:
+    description: Адрес registry (напр. docker.io или ghcr.io)
+    required: true
+  username:
+    description: Имя пользователя для логина
+    required: true
+  password:
+    description: Пароль / токен для логина
+    required: true
+  source-image:
+    description: Локальный тег собранного образа (откуда тегировать)
+    required: true
+  target-image:
+    description: Полное имя образа в целевом registry без тега (напр. ghcr.io/owner/repo)
+    required: true
+  tag:
+    description: Тег для пуша
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Login to registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+
+    - name: Tag and push
+      shell: bash
+      run: |
+        docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE:$TAG"
+        docker push "$TARGET_IMAGE:$TAG"
+      env:
+        SOURCE_IMAGE: ${{ inputs.source-image }}
+        TARGET_IMAGE: ${{ inputs.target-image }}
+        TAG: ${{ inputs.tag }}
