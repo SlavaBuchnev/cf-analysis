@@ -8,11 +8,12 @@ import pureconfig.{ConfigReader, ConfigSource}
 case class AppConfig(
     httpServer: HttpServerConfig,
     rateLimiter: RateLimiterConfig,
-    cfApi: Option[CfAuthConfig],
+    cfApi: CfAuthConfig,
     cache: CacheConfig,
     cors: CorsConfig,
 ) derives ConfigReader
 
+/** Загрузка корневой конфигурации `application.conf` и публичные слои-проекции отдельных её секций. */
 object AppConfig {
 
   /** Полная конфигурация приложения (приватная, используется через проекции ниже). */
@@ -21,7 +22,7 @@ object AppConfig {
 
   val rateLimiterCfgLayer: ZLayer[Any, Throwable, RateLimiterConfig] = layer.project(_.rateLimiter)
 
-  val cfApiCfgOptLayer: ZLayer[Any, Throwable, Option[CfAuthConfig]] = layer.project(_.cfApi)
+  val cfApiCfgLayer: ZLayer[Any, Throwable, CfAuthConfig] = layer.project(_.cfApi)
 
   val httpServerCfgLayer: ZLayer[Any, Throwable, HttpServerConfig] = layer.project(_.httpServer)
 

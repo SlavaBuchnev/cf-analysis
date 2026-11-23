@@ -6,9 +6,12 @@ import java.nio.charset.StandardCharsets
 import zio.*
 import zio.http.*
 
-/** Роуты для работы с фронтом
+/** Роуты для отдачи статического SPA (vanilla JS + Chart.js из classpath).
   *
-  * Эндпоинт `GET / ` возвращает форму или 404
+  * Любой `GET`-запрос обрабатывается через `trailing`-путь: файл ищется в ресурсах `static/` (с защитой от path
+  * traversal — сегменты `.`/`..` и пустые сегменты отклоняются), при отсутствии файла отдаётся fallback на `index.html`
+  * (клиентский роутинг), если нет и его — `404`. Тип контента определяется по расширению (`html`, `css`, `js`), прочее
+  * — `application/octet-stream`.
   */
 object StaticRoutes {
 

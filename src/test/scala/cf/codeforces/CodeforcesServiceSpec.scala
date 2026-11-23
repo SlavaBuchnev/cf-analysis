@@ -77,6 +77,18 @@ object CodeforcesServiceSpec extends MockedSpec {
           exit.causeOption.exists(_.failures.exists(_.getMessage == "api down")),
         )
       },
+      test("stops and returns partial data when API repeats submissions") { (client, service) =>
+        val batch = (1 to 1000).map(i => submission(id = i.toLong)).toList
+        client.getStatus.expects(1, Some(1), Some(1000)).returnsZIO(batch)
+        client.getStatus.expects(1, Some(1001), Some(1000)).returnsZIO(batch)
+        for {
+          result <- service.loadFullContestData(1)
+        } yield assertTrue(
+          result.size == 1000,
+          result.head.id == 1L,
+          result.last.id == 1000L,
+        )
+      },
     )
 
   private def fetchRecentStatusesTests: Spec[TestEnvironment & Scope, Any] =
