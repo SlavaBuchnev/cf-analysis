@@ -12,13 +12,17 @@ import io.micrometer.prometheusmetrics.{PrometheusConfig, PrometheusMeterRegistr
 
 /** Сборщик метрик на базе Micrometer/Prometheus.
   *
-  * Предоставляет единый [[PrometheusMeterRegistry]], обновление gauge-метрик и вспомогательные вычисления по посылкам
-  * (например, ограничения по времени).
+  * Предоставляет единый [[io.micrometer.prometheusmetrics.PrometheusMeterRegistry]], обновление gauge-метрик и
+  * вспомогательные вычисления по посылкам (например, ограничения по времени).
   */
 object MetricsCollector {
 
+  /** Глобальный синглтон-реестр Prometheus. Gauge накапливаются в нём и между перезапусками, и между тестами — не
+    * сбрасываются.
+    */
   val registry: PrometheusMeterRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
+  /** Слой, поставляющий [[registry]] в окружение; реестр закрывается при остановке приложения. */
   val layer: ZLayer[Any, Nothing, PrometheusMeterRegistry] =
     ZLayer.scoped {
       ZIO.acquireRelease(ZIO.succeed(registry))(r => ZIO.succeed(r.close()))
@@ -26,6 +30,9 @@ object MetricsCollector {
 
   private val gaugeValues = new ConcurrentHashMap[String, AtomicReference[Double]]()
 
+  /** Обновить значение gauge `name` с тегами `tags`: хранилище значений копится по ключу «имя + теги», сам gauge в
+    * реестре регистрируется один раз при первом обращении.
+    */
   def updateGauge(name: String, tags: Tags, value: Double): Unit = {
     val key = s"$name${tags.toString}"
     val atomic = gaugeValues.computeIfAbsent(
@@ -48,10 +55,13 @@ object MetricsCollector {
   private def normalizedHandle(s: CfSubmission): String =
     s.author.members.headOption.map(_.handle.toLowerCase).getOrElse("unknown")
 
-    /** Перегрузка для ContestCache: считаем по всем участникам контеста. */
+  /** Перегрузка для кэша контестов: метрики считаются по всем участникам контеста. */
   def updateContestMetrics(contestId: Int, statuses: List[CfSubmission]): Unit =
     updateContestMetrics(contestId, statuses, Nil)
 
+  /** Пересчитать gauge-метрики `cf_user_*` по посылкам контеста; при непустом `targetHandles` — только по этим хендлам
+    * (регистр не учитывается).
+    */
   def updateContestMetrics(
       contestId: Int,
       statuses: List[CfSubmission],

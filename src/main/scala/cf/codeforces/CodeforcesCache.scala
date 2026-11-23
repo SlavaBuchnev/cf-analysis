@@ -15,11 +15,24 @@ import cf.models.{ContestEntry, ContestState}
   * (`idleTtl`), а также умеет прогреваться при старте и вытеснять неактивные контесты.
   */
 trait CodeforcesCache {
+
+  /** Получить состояние контеста: из кэша или загрузив целиком через сервис; при устаревании данных запускает фоновое
+    * обновление по последним посылкам.
+    */
   def get(contestId: Int): Task[ContestState]
+
+  /** Прогреть кэш стартовым набором контестов (`cache.warmup-contest-ids`); ошибки отдельных контестов не прерывают
+    * прогрев, а только логируются.
+    */
   def warmup: UIO[Unit]
+
+  /** Вытеснить контесты, к которым не обращались дольше `idle-ttl` (warmup-набор не трогается); вернуть число
+    * вытесненных.
+    */
   def evictIdle: UIO[Int]
 }
 
+/** Реализация [[CodeforcesCache]] поверх `zio.cache.Cache` с `Ref`-метками последнего доступа и обновления. */
 class CodeforcesCacheImpl(
     service: CodeforcesService,
     cache: Cache[Int, Throwable, ContestEntry],
@@ -97,7 +110,10 @@ class CodeforcesCacheImpl(
 
 }
 
+/** Фабрика слоя [[CodeforcesCache]]. */
 object CodeforcesCache {
+
+  /** Слой кэша: создаёт `zio.cache.Cache` с lookup-загрузкой полного состояния контеста. */
   val layer: ZLayer[CodeforcesService & CacheConfig, Throwable, CodeforcesCache] =
     ZLayer.fromZIO {
       for {
@@ -112,6 +128,7 @@ object CodeforcesCache {
       } yield new CodeforcesCacheImpl(service, cache, lastAccess, cfg)
     }
 
+  /** Первичная загрузка контеста в кэш: полный набор посылок, стартовые метрики, метки времени. */
   private def loadEntry(service: CodeforcesService, cid: Int): ZIO[Any, Throwable, ContestEntry] =
     for {
       subs <- service.loadFullContestData(cid)

@@ -29,6 +29,7 @@ object Dependencies {
     "dev.zio" %% "zio" % zioVersion,
     "dev.zio" %% "zio-http" % "3.11.4",
     "dev.zio" %% "zio-cache" % "0.3.0",
+    "com.softwaremill.sttp.client4" %% "zio" % "4.1.3",
     "com.github.pureconfig" %% "pureconfig-core" % "0.17.10",
     "ch.qos.logback" % "logback-classic" % "1.6.3",
     "nl.vroste" %% "rezilience" % "0.10.5",

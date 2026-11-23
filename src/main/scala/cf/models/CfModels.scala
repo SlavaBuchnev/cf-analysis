@@ -29,6 +29,9 @@ case class CfProblem(
 ) derives JsonDecoder,
       JsonEncoder
 
+/** Автор(ы) посылки: одиночный участник или команда с типом участия (`CONTESTANT`, `OUT_OF_COMPETITION`, `VIRTUAL`,
+  * ...).
+  */
 case class CfParty(
     contestId: Option[Int],
     members: List[CfMember],
@@ -40,6 +43,7 @@ case class CfParty(
 ) derives JsonDecoder,
       JsonEncoder
 
+/** Участник Codeforces (один хендл из состава авторов посылки). */
 case class CfMember(handle: String) derives JsonDecoder, JsonEncoder
 
 /** Одна посылка участника в контесте Codeforces. */

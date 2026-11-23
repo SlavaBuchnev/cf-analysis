@@ -9,7 +9,8 @@
 ## Технологический стек
 
 - Scala **3.9.0**, sbt **2.0.8**, JDK **25** (eclipse-temurin; образ приложения и CI на 25-й)
-- **ZIO 2.1.26**: zio-http 3.11.4 (сервер и клиент), zio-cache 0.3.0, zio-json (`derives JsonDecoder/JsonEncoder`)
+- **ZIO 2.1.26**: zio-http 3.11.4 (сервер), zio-cache 0.3.0, zio-json (`derives JsonDecoder/JsonEncoder`)
+- **sttp client4** 4.1.3 (модуль `zio`, бэкенд `java.net.http.HttpClient`) — исходящие HTTP-запросы к Codeforces
 - **pureconfig-core** 0.17.10 — загрузка HOCON-конфигурации (секция `app` в `application.conf`)
 - **rezilience** 0.10.5 — rate limiter для запросов к Codeforces
 - **Micrometer** 1.17.1 + `micrometer-registry-prometheus` — метрики, endpoint `/metrics`
@@ -29,11 +30,16 @@
 - `cf.HttpServer` — обёртка над `zio-http Server` (лимиты заголовков, keep-alive, таймауты,
   graceful shutdown) на основе `HttpServerConfig`
 - `cf.codeforces`:
-  - `CodeforcesClient` — HTTP-клиент к `codeforces.com/api`: подпись запросов SHA-512
-    (`apiSig`) при наличии ключа, `time`-параметр, `asManager=true`, rate limit, детект
-    HTML-ответа (Cloudflare-челлендж) по первому символу `<`
-  - `CodeforcesService` — бизнес-операции: `loadFullContestData` (пагинация страницами по 1000),
-    `fetchRecentStatuses`
+  - `CodeforcesClient` — HTTP-клиент к `codeforces.com/api` поверх sttp (`java.net.http.HttpClient`):
+    подпись запросов SHA-512 (`apiSig`), `time`-параметр, `asManager=true`, rate limit, детект
+    HTML-ответа (Cloudflare-челлендж) по первому символу `<`. Каждый запрос обёрнут в цепочку
+    устойчивости (read-таймаут sttp, retry с backoff и circuit breaker через rezilience;
+    ретраятся только транзиентные ошибки — `TransientCfError`), в логи уходят только
+    безопасные параметры (`apiKey`/`apiSig` маскируются, полный URI — по флагу `log-full-uri`).
+    Политики строятся из `cf-api.http-client` (`CircuitBreakerConfig.build`)
+  - `CodeforcesService` — бизнес-операции: `loadFullContestData` (пагинация страницами по 1000, аккумулятор на
+    `Vector`, остановка при повторе уже полученных посылок и при лимите `cf-api.max-submissions` — защита от аномалий
+    API), `fetchRecentStatuses`
   - `CodeforcesCache` — кэш на `zio.cache.Cache` + `Ref`: политики `refreshAfter` / `idleTtl`,
     warmup по `warmupContestIds`, `evictIdle`
 - `cf.configs` — кейс-классы конфигурации (`derives ConfigReader`) + `AppConfig`: приватный слой
@@ -70,8 +76,8 @@ sbt doc                   # Scaladoc (настройки в project/ScaladocSett
 Для `sbt run` нужны переменные окружения `HTTP`, `PORT`, `KEY`, `SECRET` — они подставляются в
 `src/main/resources/application.conf` (`http-server.host/port`, `cf-api.key/secret`). Значения
 обычно берутся из `.env` в корне (в `.gitignore`, подхватывается run-конфигурацией IDEA
-`.run/runMain.run.xml`). Обратите внимание: `cf-api` формально `Option` в модели, но подстановки
-`${KEY}`/`${SECRET}` разрешаются при загрузке конфигурации — без этих переменных приложение не стартует.
+`.run/runMain.run.xml`). Секция `cf-api` обязательна: подстановки `${KEY}`/`${SECRET}` разрешаются при
+загрузке конфигурации — без этих переменных приложение не стартует.
 
 Docker-образ: база `eclipse-temurin:25.0.5_8-jre-noble` (закреплённая версия, не плавающий тег),
 порт 8080, JVM-флаги `-XX:MaxRAMPercentage=75.0`, `+UseZGC` (на JDK 25 это Generational ZGC;
@@ -115,7 +121,15 @@ Docker-образ: база `eclipse-temurin:25.0.5_8-jre-noble` (закрепл
   `warmup-contest-ids` (стартовые значения: capacity 100, ttl 1h, idle-ttl 15m, refresh-after 1m)
 - `http-server` — `host`, `port` (из env), лимиты заголовков/initial line, `keep-alive`, таймауты
 - `rate-limiter` — `max` запросов за `interval` (по умолчанию 1 запрос / 2 секунды)
-- `cf-api` — `key`, `secret` (из env)
+- `cf-api` — `key`, `secret` (из env), `log-full-uri` (дефолт `false`: логировать полный URI с секретами — только
+  для отладки), `max-submissions` (лимит полной загрузки контеста в посылках, дефолт 200k: при достижении пагинация
+  останавливается, возвращается накопленное) и вложенный `http-client`: таймауты (`request-timeout` — read-таймаут
+  запроса, `connection-timeout` — установка соединения), retry (`retry-base-delay`, `retry-max-delay`,
+  `retry-max-attempts`), `circuit-breaker`
+- `circuit-breaker` (типизированный ридер, см. `CircuitBreakerConfig`) — `type` (`failure-count` | `failure-rate`),
+  общий `reset-timeout` и блок `parameters` с настройками стратегии: `max-failures` для `failure-count`;
+  `failure-rate-threshold` (0..1) и опциональные `sample-duration`/`min-throughput` (дефолты как в rezilience) для
+  `failure-rate`; неудачами считаются только транзиентные ошибки
 - `cors` — `enabled`, `allowed-origins`, `allowed-methods`, `allowed-headers`, `max-age`
   (по умолчанию выключено: SPA отдаётся с того же origin; origin разрешается точным совпадением строки)
 

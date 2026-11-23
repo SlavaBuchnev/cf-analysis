@@ -18,6 +18,7 @@ final class AppLifecycle(cache: CodeforcesCache, cfg: CacheConfig) {
       ZIO.never
 }
 
+/** Фабрика слоя [[AppLifecycle]]. */
 object AppLifecycle {
   val layer: ZLayer[CodeforcesCache & CacheConfig, Nothing, AppLifecycle] =
     ZLayer.fromFunction(new AppLifecycle(_, _))

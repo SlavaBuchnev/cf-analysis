@@ -35,8 +35,8 @@ final case class ContestState(submissions: Map[Long, CfSubmission]) {
     submissions.keySet.diff(previous.submissions.keySet).size
 }
 
+/** Фабрика состояний: пустое состояние и сборка из полного списка посылок. */
 object ContestState {
-
   val empty: ContestState = ContestState(Map.empty)
 
   /** Собрать состояние из полного списка посылок (используется при initial load). */

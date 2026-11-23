@@ -30,4 +30,23 @@ trait MockedSpec extends ScalamockZIOSpec {
         result <- f(m, r)
       } yield result
     }.provide(layer, mockM)
+
+  /** Перегрузка [[testWithMock]] для сервисов, которым кроме мока нужна дополнительная среда `E` (например,
+    * конфигурация).
+    */
+  protected def testWithMock[M: Tag, E: Tag, R: Tag](
+      label: String,
+      mockM: ULayer[M],
+      env: ULayer[E],
+      layer: ZLayer[M & E, Throwable, R],
+  )(
+      f: (M, R) => ZIO[Any, Throwable, TestResult],
+  ): Spec[TestEnvironment & Scope, Any] =
+    test(label) {
+      for {
+        r <- ZIO.service[R]
+        m <- ZIO.service[M]
+        result <- f(m, r)
+      } yield result
+    }.provide(layer, mockM, env)
 }
