@@ -152,8 +152,8 @@ Docker-образ: база `eclipse-temurin:25.0.5_8-jre-noble` (закрепл
 - `.github/workflows/deploy.yml` — ручной запуск: у сервиса Render обновляется image path и
   стартует деплой через hook, затем статус деплоя поллится до `live` (до 20 минут).
   Secrets: `RENDER_API_KEY`, `RENDER_DEV_SERVICE_ID`, `RENDER_DEV_DEPLOY_HOOK_URL`, `DOCKER_USERNAME`.
-- Readme.md указывает живой адрес `https://cf-analysis.up.railway.app/` и бейдж внешнего healthcheck
-  cron-job.org — это более старая площадка; актуальный деплой описан в `deploy.yml` (Render).
+- Readme.md указывает живой адрес `https://cf-analysis.up.railway.app/`, бейдж внешнего healthcheck cron-job.org —
+  в Contributing.md — это более старая площадка; актуальный деплой описан в `deploy.yml` (Render).
 
 ⚠️ Команды из Readme `sbt ciGenerateGithubWorkflow` и `sbt ciCheckGithubWorkflow` в текущей сборке
 **не определены** (плагина sbt-github-actions нет, workflow'ы правятся вручную). `sbt lint` определён —

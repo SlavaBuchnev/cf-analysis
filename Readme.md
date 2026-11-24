@@ -1,33 +1,23 @@
-![Cron job status](https://api.cron-job.org/jobs/8838436/a85759c3aceb5a69/status-1.svg)
+# cf-analysis
 
-Чтобы использовать contest.status и он не отдавал ошибками надо:
-- Чтобы пользователь был в группе и был менеджером контеста(если не будет менеджером будет возвращать что контеста нет)
+Сервис аналитики контестов Codeforces в виде готового Docker-образа: загружает посылки контеста через публичное API
+Codeforces, кэширует их с инкрементальным обновлением и отдаёт:
 
-```bash
-# Локально прогнать те же проверки, что и в CI
-sbt lint        # проверка форматирования (scalafmtCheckAll)
-sbt test        # тесты
-```
-```
-https://cf-analysis.up.railway.app/
-```
+- **JSON-API** — `GET /api/contests/{id}` (отсортированный список посылок контеста);
+- **метрики Prometheus** — `GET /metrics` (gauge `cf_user_*` по хендлам, задачам и языкам);
+- **статический SPA** — `/` (vanilla JS + Chart.js: таблицы и графики по контесту).
 
-## Запуск Docker-образа
+## Образы
 
-Готовые образы публикуются на каждый пуш (зелёный pipeline):
-- **GitHub Packages** (только master): `ghcr.io/slavabuchnev/cf-analysis:latest` — последний зелёный master, `master-latest` — тот же образ под неизменяемым тегом (для откатов);
-- **Docker Hub**: `<dockerhub-user>/cf-analysis:master-latest` (master) или `:dev-latest` (остальные ветки).
+| Реестр | Адрес | Теги |
+|---|---|---|
+| GitHub Packages | `ghcr.io/slavabuchnev/cf-analysis` | `latest`, `master-latest` (только master) |
+| Docker Hub | `<dockerhub-user>/cf-analysis` | `master-latest` (master), `dev-latest` (остальные ветки) |
 
-### Параметры (переменные окружения)
+- `latest` — мутабельный указатель на последний зелёный master (есть только в ghcr.io, куда пушится только master);
+- `master-latest` — тот же образ под неизменяемым тегом конкретного прогона: для откатов и фиксации «что сейчас в проде».
 
-| Параметр | Описание |
-|---|---|
-| `KEY` | apiKey Codeforces API (обязателен; владелец ключа должен быть менеджером контестов) |
-| `SECRET` | секрет Codeforces API (обязателен) |
-| `HTTP` | хост прослушивания сервера, в контейнере — `0.0.0.0` (обязателен) |
-| `PORT` | порт сервера, в контейнере — `8080` (обязателен) |
-
-### Пример
+## Быстрый старт
 
 ```bash
 docker run -d --name cf-analysis \
@@ -37,6 +27,34 @@ docker run -d --name cf-analysis \
   ghcr.io/slavabuchnev/cf-analysis:latest
 ```
 
-Проверка: `curl localhost:8080/ping` → `200 OK`; метрики Prometheus — `GET /metrics`; JSON-API контеста — `GET /api/contests/{id}`.
+### Параметры (переменные окружения)
 
-Внутри образа приложение стартует под непривилегированным пользователем с JVM-флагами `-XX:MaxRAMPercentage=75.0 -XX:+UseZGC` — лимиты памяти контейнера подхватываются автоматически.
+| Параметр | Описание |
+|---|---|
+| `KEY` | apiKey Codeforces API (обязателен) |
+| `SECRET` | секрет Codeforces API (обязателен) |
+| `HTTP` | хост прослушивания сервера, в контейнере — `0.0.0.0` (обязателен) |
+| `PORT` | порт сервера, в контейнере — `8080` (обязателен) |
+
+Владелец `apiKey` должен быть **менеджером контеста** (запросы идут с `asManager=true`) — иначе API отвечает,
+будто контеста не существует.
+
+### Проверка работы
+
+```bash
+curl localhost:8080/ping                  # 200 OK — сервис жив
+curl localhost:8080/metrics               # scrape для Prometheus
+curl localhost:8080/api/contests/551173   # посылки контеста (JSON)
+```
+
+### Внутри образа
+
+Приложение стартует под непривилегированным пользователем (`app`, uid/gid 1001) с JVM-флагами
+`-XX:MaxRAMPercentage=75.0 -XX:+UseZGC` — лимиты памяти контейнера подхватываются автоматически.
+База: `eclipse-temurin:25-jre`, порт `8080`.
+
+## Ссылки
+
+- Live: https://cf-analysis.up.railway.app/ (старое развёртывание; актуальный деплой — Render, `.github/workflows/deploy.yml`, ручной запуск);
+- Разработка и локальный запуск: [Contributing.md](Contributing.md);
+- Устройство проекта, стиль, конфигурация: [AGENTS.md](AGENTS.md).
