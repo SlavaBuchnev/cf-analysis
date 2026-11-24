@@ -1,8 +1,5 @@
 # cf-analysis
 
-![Pipeline](https://github.com/SlavaBuchnev/cf-analysis/actions/workflows/pipeline.yml/badge.svg)
-![Cron job status](https://api.cron-job.org/jobs/8838436/a85759c3aceb5a69/status-1.svg)
-
 Сервис аналитики контестов Codeforces в виде готового Docker-образа: загружает посылки контеста через публичное API
 Codeforces, кэширует их с инкрементальным обновлением и отдаёт:
 

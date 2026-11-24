@@ -1,5 +1,8 @@
 # Разработка
 
+![Pipeline](https://github.com/SlavaBuchnev/cf-analysis/actions/workflows/pipeline.yml/badge.svg)
+![Cron job status](https://api.cron-job.org/jobs/8838436/a85759c3aceb5a69/status-1.svg)
+
 Бэкенд: Scala 3 / ZIO 2 (zio-http, zio-cache, zio-json), sttp client4, rezilience, Micrometer/Prometheus.
 Фронтенд — статический SPA в `src/main/resources/static` (vanilla JS + Chart.js, без сборщика).
 
